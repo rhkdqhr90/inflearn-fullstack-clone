@@ -11,6 +11,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.937.0
         version: 3.937.0
+      '@nestjs/class-transformer':
+        specifier: 0.4.0
+        version: 0.4.0
       '@nestjs/common':
         specifier: ^11.0.1
         version: 11.1.9(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -861,6 +864,9 @@ packages:
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
+
+  '@nestjs/class-transformer@0.4.0':
+    resolution: {integrity: sha512-aHKhqPVixFCo8m7n2iP1uGgfyF0eYlAgGJKfW27l0BvRCTPBjmoL4956Cf9xVu6WNJzVsp//SOcpIavdnNHYZg==}
 
   '@nestjs/cli@11.0.10':
     resolution: {integrity: sha512-4waDT0yGWANg0pKz4E47+nUrqIJv/UqrZ5wLPkCqc7oMGRMWKAaw1NDZ9rKsaqhqvxb2LfI5+uXOWr4yi94DOQ==}
@@ -5053,6 +5059,8 @@ snapshots:
       '@emnapi/runtime': 1.7.1
       '@tybys/wasm-util': 0.10.1
     optional: true
+
+  '@nestjs/class-transformer@0.4.0': {}
 
   '@nestjs/cli@11.0.10(@types/node@22.19.1)':
     dependencies:

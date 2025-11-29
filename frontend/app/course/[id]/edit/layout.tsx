@@ -19,7 +19,7 @@ export default async function EditCouresLayout({
 
   return (
     <div className="w-full h-full bg-[#F1F3F5]">
-      <EditCourseHeader title={course.data?.title}></EditCourseHeader>
+      <EditCourseHeader course={course.data}></EditCourseHeader>
       <div className="flex min-h-screen  p-12 gap-12 max-w-5xl">
         <EditCourseSidebar></EditCourseSidebar>
         <div className="flex-1">{children}</div>

@@ -13,7 +13,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model Account {
   id                 String  @id @default(cuid())
   userId             String  @map("user_id")
@@ -64,6 +63,7 @@ model User {
   courseQuestions CourseQuestion[]
   courseComments CourseCommnet[]
   lectureActivities LectureActivity[]
+  courseFavorites CourseFavorite[]
 
   @@map("users")
 }
@@ -89,7 +89,6 @@ model Course {
   level String @default("BEGINNER")
   status String @default("DRAFT")
   instructorId String @map("instructor_id")
-  isPublished Boolean @default(false) @map("is_published")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   
@@ -101,6 +100,7 @@ model Course {
   enrollments CourseEnrollment[]
   reviews CourseReview[]
   questions CourseQuestion[]
+  favorites CourseFavorite[]
 
   @@map("courses")
 }
@@ -108,7 +108,7 @@ model Course {
 model Section {
   id String @id @default(uuid())
   title String
-  desciption String?
+  description String?
   order Int
   courseId String @map("course_id")
   createdAt DateTime @default(now()) @map("created_at")
@@ -173,7 +173,7 @@ model CourseEnrollment{
 model CourseReview{
   id String @id @default(uuid())
   content String 
-  reting Int
+  rating Int
   userId String @map("user_id")
   courseId String @map("course_id")
   instructorReply String? @map("instructor_replay") 
@@ -216,6 +216,21 @@ model CourseCommnet{
   user User @relation(fields: [userId],references: [id],onDelete: Cascade)
 
   @@map("course_commnets")
+}
+
+model CourseFavorite {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  courseId String @map("course_id")
+  createAt DateTime @default(now()) @map("create_at")
+
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId,courseId])
+  @@map("course_favorites")
+
+
 }
 
 model LectureActivity{

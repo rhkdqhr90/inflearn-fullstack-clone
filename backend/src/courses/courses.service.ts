@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Injectable,
   NotFoundException,
@@ -7,7 +10,12 @@ import { Course, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import slugfy from 'slug';
+import slugfy from 'lib/slugify';
+import { SearchCourseResponseDto } from './dto/search-rsponse.dto';
+import { SearchCourseDto } from './dto/search-course.dto';
+import { CourseDetailDto } from './dto/course-detail.dto';
+import { CourseFavorite as CourseFavoriteEntity } from 'src/_gen/prisma-class/course_favorite';
+import { GetFavoriteResponseDto } from './dto/favorite.dto';
 @Injectable()
 export class CoursesService {
   constructor(private prisma: PrismaService) {}
@@ -43,14 +51,83 @@ export class CoursesService {
     });
   }
 
-  async findOne(
-    id: string,
-    include?: Prisma.CourseInclude,
-  ): Promise<Course | null> {
-    return this.prisma.course.findUnique({
+  async findOne(id: string): Promise<CourseDetailDto | null> {
+    const course = await this.prisma.course.findUnique({
       where: { id },
-      include,
+      include: {
+        instructor: true,
+        categories: true,
+        reviews: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+        enrollments: true,
+        sections: {
+          include: {
+            lectures: {
+              select: {
+                id: true,
+                title: true,
+                isPreview: true,
+                duration: true,
+                order: true,
+              },
+              orderBy: {
+                order: 'asc',
+              },
+            },
+          },
+          orderBy: {
+            order: 'asc',
+          },
+        },
+        _count: {
+          select: {
+            enrollments: true,
+            reviews: true,
+            lectures: true,
+          },
+        },
+      },
     });
+
+    if (!course) {
+      return null;
+    }
+    const averageRating =
+      course.reviews.length > 0
+        ? course.reviews.reduce((sum, review) => sum + review.rating, 0) /
+          course.reviews.length
+        : 0;
+    const totalDuration = course.sections.reduce(
+      (sum, section) =>
+        sum +
+        section.lectures.reduce(
+          (lecSum, lecture) => lecSum + (lecture.duration || 0),
+          0,
+        ),
+      0,
+    );
+
+    const result = {
+      ...course,
+      totalEnrollments: course._count.enrollments,
+      averageRating: Math.round(averageRating * 10) / 10,
+      totalReviews: course._count.reviews,
+      totalLectures: course._count.lectures,
+      totalDuration,
+    };
+    return result as unknown as CourseDetailDto;
   }
 
   async update(
@@ -97,5 +174,194 @@ export class CoursesService {
       where: { id },
     });
     return course;
+  }
+
+  async searchCourses(
+    searchCourseDto: SearchCourseDto,
+  ): Promise<SearchCourseResponseDto> {
+    const { q, category, priceRange, sortBy, order, page, pageSize } =
+      searchCourseDto;
+
+    const where: Prisma.CourseWhereInput = {};
+
+    if (q) {
+      where.OR = [
+        {
+          title: {
+            contains: q,
+            mode: 'insensitive',
+          },
+        },
+        {
+          instructor: {
+            name: {
+              contains: q,
+              mode: 'insensitive',
+            },
+          },
+        },
+      ];
+    }
+
+    if (category) {
+      where.categories = {
+        some: {
+          slug: category,
+        },
+      };
+    }
+    if (priceRange) {
+      const priceConditions: any = {};
+      if (priceRange.min !== undefined) {
+        priceConditions.gte = priceRange.min;
+      }
+      if (priceRange.max !== undefined) {
+        priceConditions.lte = priceRange.max;
+      }
+      if (Object.keys(priceConditions).length > 0) {
+        where.price = priceConditions;
+      }
+    }
+
+    const orderBy: Prisma.CourseOrderByWithRelationInput = {};
+    if (sortBy == 'price') {
+      orderBy.price = order as 'asc' | 'desc';
+    }
+    const skip = (page - 1) * pageSize;
+    const totalItems = await this.prisma.course.count({ where });
+    const courses = await this.prisma.course.findMany({
+      where,
+      orderBy,
+      skip,
+      take: pageSize,
+      include: {
+        instructor: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        categories: true,
+        _count: {
+          select: {
+            enrollments: true,
+            reviews: true,
+          },
+        },
+      },
+    });
+
+    // 페이지네이션 정보 계산
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const hasNext = page < totalPages;
+    const hasPrev = page > 1;
+
+    return {
+      courses: courses as any[],
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        hasNext,
+        hasPrev,
+      },
+    };
+  }
+  async addFavorite(courseId: string, userId: string): Promise<boolean> {
+    try {
+      const existingFavorite = await this.prisma.courseFavorite.findFirst({
+        where: {
+          userId,
+          courseId,
+        },
+      });
+      if (existingFavorite) {
+        return true;
+      }
+
+      await this.prisma.courseFavorite.create({
+        data: {
+          userId,
+          courseId,
+        },
+      });
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  async removeFavorite(courseId: string, userId: string): Promise<boolean> {
+    try {
+      const existingFavorite = await this.prisma.courseFavorite.findFirst({
+        where: {
+          userId,
+          courseId,
+        },
+      });
+      if (existingFavorite) {
+        await this.prisma.courseFavorite.delete({
+          where: {
+            id: existingFavorite.id,
+          },
+        });
+        return true;
+      }
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  async getFavorite(
+    courseId: string,
+    userId?: string,
+  ): Promise<GetFavoriteResponseDto> {
+    const course = await this.prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+      include: {
+        _count: {
+          select: {
+            favorites: true,
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException(`${courseId}를 코스를 찾지 못했습니다.`);
+    }
+
+    if (userId) {
+      const existingFavorite = await this.prisma.courseFavorite.findFirst({
+        where: {
+          userId,
+          courseId,
+        },
+      });
+
+      return {
+        isFavorite: !!existingFavorite,
+        favoriteCount: course._count.favorites,
+      };
+    } else {
+      return {
+        isFavorite: false,
+        favoriteCount: course._count.favorites,
+      };
+    }
+  }
+
+  async getMyFavorites(userId: string): Promise<CourseFavoriteEntity[]> {
+    const existingFavorites = await this.prisma.courseFavorite.findMany({
+      where: {
+        userId,
+      },
+    });
+    return existingFavorites as unknown as CourseFavoriteEntity[];
   }
 }

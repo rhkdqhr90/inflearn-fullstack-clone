@@ -23,22 +23,12 @@ export class MediaService {
     const fileExtension = file.originalname.split('.').pop();
     const key = `media/${userId}/${uuid()}.${fileExtension}`;
 
-    // 한글 파일명을 위한 ContentDisposition 헤더 생성
-    const encodedFileName = encodeURIComponent(file.originalname);
-    const contentDisposition = `attachment; filename="${file.originalname}"; filename*=UTF-8''${encodedFileName}`;
-
     const res = await this.s3Client.send(
       new PutObjectCommand({
         Bucket: process.env.AWS_MEDIA_S3_BUCKET_NAME,
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
-        ContentDisposition: contentDisposition,
-        Metadata: {
-          'original-filename': Buffer.from(file.originalname, 'utf-8').toString(
-            'base64',
-          ),
-        },
       }),
     );
     return {

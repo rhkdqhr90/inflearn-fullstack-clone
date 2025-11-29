@@ -1,26 +1,20 @@
 import { auth } from "@/auth";
-import { signOut } from "@/auth";
-import Link from "next/link";
+import CourseList from "@/components/course-list";
+import { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "인프런 - 라이프타임 커리어 플랫폼",
+  description: "인프런은 라이프타임 커리어 플랫폼입니다.",
+};
 
-export default async function Home() {
-  const session = await auth();
-
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ page_number?: string }>;
+}) {
+  const { page_number } = await searchParams;
   return (
-    <div>
-      <p>현재 로그인한 유저 보여주기</p>
-      <p>이메일 = {session?.user?.email}</p>
-      {session?.user ? (
-        <form
-          action={async () => {
-            "use server";
-            await signOut();
-          }}
-        >
-          <button type="submit">로그아웃</button>
-        </form>
-      ) : (
-        <Link href="/signin">로그인</Link>
-      )}
+    <div className="p-6 ">
+      <CourseList q={""} page={page_number ? parseInt(page_number) : 1} />
     </div>
   );
 }

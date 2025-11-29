@@ -16,11 +16,11 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import CKEditor from "@/components/ckeditor";
 import { FileVideo } from "lucide-react";
 import * as api from "@/lib/api";
 import { toast } from "sonner";
 import { Lecture } from "@/generated/openapi-client";
+import dynamic from "next/dynamic";
 
 interface EditLectureDialogProps {
   isOpen: boolean;
@@ -41,7 +41,9 @@ const ACCEPTED_VIDEO_TYPES = {
   "video/x-m4v": [".m4v"],
   "video/quicktime": [".mov"],
 };
-
+const CKEditor = dynamic(() => import("@/components/ckeditor"), {
+  ssr: false,
+});
 export function EditLectureDialog({
   isOpen,
   onClose,
@@ -99,7 +101,7 @@ export function EditLectureDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-auto flex flex-col">
         <DialogHeader>
           <DialogTitle>강의 수정</DialogTitle>
         </DialogHeader>

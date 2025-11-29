@@ -2,19 +2,28 @@
 
 import {
   categoriesControllerFindAll,
+  coursesControllerAddFavorite,
   coursesControllerCreate,
   coursesControllerFindAll,
   coursesControllerFindOne,
+  coursesControllerGetFavorite,
+  coursesControllerGetMyFavorites,
+  coursesControllerRemoveFavorite,
+  coursesControllerSearch,
   coursesControllerUpdate,
   lecturesControllerCreate,
   lecturesControllerDelet,
   lecturesControllerUpdate,
   mediaControllerUploadMedia,
+  SearchCourseDto,
   sectionsControllerCreate,
   sectionsControllerDelete,
   sectionsControllerUpdate,
   UpdateCourseDto,
   UpdateLectureDto,
+  UpdateUserDto,
+  usersControllerGetProfile,
+  usersControllerUpdateProfile,
 } from "@/generated/openapi-client";
 
 export const getAllCategories = async () => {
@@ -37,9 +46,6 @@ export const getCourseById = async (id: string, include?: string) => {
   const { data, error } = await coursesControllerFindOne({
     path: {
       id,
-    },
-    query: {
-      include: include ?? "sections, lectures",
     },
   });
 
@@ -163,5 +169,58 @@ export const uploadMedia = async (file: File) => {
     },
   });
 
+  return { data, error };
+};
+
+export const getProfile = async () => {
+  const { data, error } = await usersControllerGetProfile();
+  return { data, error };
+};
+
+export const updateProfile = async (updateUserDto: UpdateUserDto) => {
+  const { data, error } = await usersControllerUpdateProfile({
+    body: updateUserDto,
+  });
+
+  return { data, error };
+};
+
+export const searchCourses = async (searchCourseDto: SearchCourseDto) => {
+  const { data, error } = await coursesControllerSearch({
+    body: searchCourseDto,
+  });
+
+  return { data, error };
+};
+
+export const addFavorite = async (courseId: string) => {
+  const { data, error } = await coursesControllerAddFavorite({
+    path: {
+      id: courseId,
+    },
+  });
+  return { data, error };
+};
+
+export const removeFavorite = async (courseId: string) => {
+  const { data, error } = await coursesControllerRemoveFavorite({
+    path: {
+      id: courseId,
+    },
+  });
+  return { data, error };
+};
+
+export const getFavorite = async (courseId: string) => {
+  const { data, error } = await coursesControllerGetFavorite({
+    path: {
+      id: courseId,
+    },
+  });
+  return { data, error };
+};
+
+export const getMyFavorite = async () => {
+  const { data, error } = await coursesControllerGetMyFavorites();
   return { data, error };
 };

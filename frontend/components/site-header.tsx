@@ -1,6 +1,7 @@
 "use client";
 
-import { CourseCategory } from "@/generated/openapi-client";
+import { CourseCategory, User } from "@/generated/openapi-client";
+import { signOut } from "@/auth";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -10,27 +11,45 @@ import {
   Paperclip,
   Users,
   Search,
-  User,
   ChevronLeft,
   ChevronRight,
-  Grid3x3,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import React, { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@radix-ui/react-popover";
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { CATEGORY_ICONS } from "@/app/constants/category-icons";
+import { Session } from "next-auth";
+import { Button } from "./ui/button";
 
 export default function SiteHeader({
+  session,
+  profile,
   categories,
 }: {
+  session: Session | null;
+  profile?: User;
   categories: CourseCategory[];
 }) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const pathname = usePathname();
-  const isSiteHeaderNeeded = !pathname.includes("/course/");
+  const isSiteHeaderNeeded = !pathname.match(
+    /^\/course\/[0-9a-f-]+(\/edit|\/edit\/.*)$/
+  );
+  const [search, setSearch] = useState("");
+
+  const router = useRouter();
 
   if (!isSiteHeaderNeeded) return null;
-  const isCategoryNeeded = pathname == "/" || pathname.includes("/courses");
-  const isInstructorPage = pathname?.startsWith("/instructor");
+  const isCategoryNeeded =
+    pathname == "/" ||
+    pathname.includes("/courses") ||
+    pathname.includes("/search");
+  const isInstructorPage = pathname?.includes("/");
 
   return (
     <header className="w-full bg-white border-b border-gray-200">
@@ -89,18 +108,80 @@ export default function SiteHeader({
 
         {/* 오른쪽: 지식공유, 아바타 */}
         <div className="flex items-center gap-4">
-          <Link
-            href="/instructor"
-            className="text-gray-700 hover:text-green-600 transition-colors"
-          >
-            지식공유
+          <Link href="/instructor">
+            <Button
+              variant="outline"
+              className="font-semibold border-gray-200 hover:border-[#1dc078] hover:text-[#1dc078]"
+            >
+              지식공유자
+            </Button>
           </Link>
-          <button className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors">
-            <User className="w-5 h-5 text-gray-600" />
-          </button>
+          {session ? (
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="ml-2 cursor-pointer">
+                  <Avatar>
+                    {profile?.image ? (
+                      <img
+                        src={profile.image}
+                        alt="avatar"
+                        className="w-full h-8 object-cover rounded-full"
+                      />
+                    ) : (
+                      <AvatarFallback>
+                        <span role="img" aria-label="user">
+                          👤
+                        </span>
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-56 p-0">
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <div className="font-semibold text-gray-800">
+                    {profile?.name || profile?.email || "내 계정"}
+                  </div>
+                  {profile?.email && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      {profile.email}
+                    </div>
+                  )}
+                </div>
+                <button
+                  className="w-full  text-left px-4 py-3 hover:bg-gray-100 focus:outline-none"
+                  onClick={() =>
+                    (window.location.href = "/my/settings/account")
+                  }
+                >
+                  <div className="font-semibold text-gray-800">프로필 수정</div>
+                </button>
+                <button
+                  className="w-full text-left px-4 py-3 hover:bg-gray-100 focus:outline-none border-t border-gray-100"
+                  onClick={() => signOut()}
+                >
+                  <div className="font-semibold text-gray-800">로그아웃</div>
+                </button>
+                <button
+                  className="w-full text-left px-4 py-3 hover:bg-gray-100 focus:outline-none border-t border-gray-100"
+                  onClick={() => router.push("/my/courses")}
+                >
+                  <div className="font-semibold text-gray-800">내 학습</div>
+                </button>
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <Link href="/signin">
+              <Button
+                variant="outline"
+                className="font-semibold border-gray-200 hover:border-[#1dc078] hover:text-[#1dc078] ml-2"
+              >
+                로그인
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
-
       {/* 둘째 줄: 검색 바 */}
       {!isInstructorPage && (
         <div className="container mx-auto px-4 py-3 border-t border-gray-100">
@@ -117,15 +198,29 @@ export default function SiteHeader({
                 type="text"
                 placeholder="AI 시대에 필요한 무기, 지금 배워보세요."
                 className="flex-1 outline-none text-gray-700 placeholder-gray-400 min-w-0"
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    if (search.trim()) {
+                      router.push(`/search?q=${search}`);
+                    }
+                  }
+                }}
               />
-              <button className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center hover:bg-green-700 transition-colors">
+              <button
+                className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center hover:bg-green-700 transition-colors"
+                onClick={() => {
+                  if (search.trim()) {
+                    router.push(`/search?q=${search}`);
+                  }
+                }}
+              >
                 <Search className="w-4 h-4 text-white" />
               </button>
             </div>
           </div>
         </div>
       )}
-
       {/* 셋째 줄: 슬라이드뷰 (배너) */}
       {!isInstructorPage && (
         <div className="container mx-auto px-4 py-4">
@@ -156,28 +251,24 @@ export default function SiteHeader({
           </div>
         </div>
       )}
-
       {/* 넷째 줄: 카테고리 리스트 */}
-      <div className="container mx-auto px-4  ">
+      <div className="header-bottom bg-white">
         {isCategoryNeeded && (
-          <div className="flex items-center justify-center py-3 gap-6">
+          <nav className="category-nav container mx-auto flex flex-wrap justify-center gap-x-6 gap-y-4 py-4 px-4 items-center">
             {categories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/categories/courses/${category.slug}`}
-                onClick={() => setSelectedCategory(category.id)}
-                className={cn(
-                  "flex flex-col items-center gap-1 whitespace-nowrap pb-2 transition-colors",
-                  selectedCategory === category.id
-                    ? "text-green-600 border-b-2 border-green-600"
-                    : "text-gray-700 hover:text-green-600"
-                )}
-              >
-                <Grid3x3 className="w-4 h-4" />
-                <span className="text-sm font-medium">{category.name}</span>
+              <Link key={category.id} href={`/courses/${category.slug}`}>
+                <div className="category-item flex flex-col items-center min-w-[72px] text-gray-700 hover:text-[#1dc078] cursor-pointer transition-colors">
+                  {React.createElement(
+                    CATEGORY_ICONS[category.slug] || CATEGORY_ICONS["default"],
+                    { size: 28, className: "mb-1" }
+                  )}
+                  <span className="text-xs font-medium whitespace-nowrap">
+                    {category.name}
+                  </span>
+                </div>
               </Link>
             ))}
-          </div>
+          </nav>
         )}
       </div>
     </header>
