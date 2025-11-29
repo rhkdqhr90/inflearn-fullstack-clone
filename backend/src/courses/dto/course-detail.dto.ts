@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Course } from 'src/_gen/prisma-class/course';
 
 export class CourseDetailDto extends Course {
+  @ApiProperty({ type: Boolean, description: '수강등록 여부' })
+  isEnrolled: boolean;
   @ApiProperty({ type: Number, description: '총 수강생 수' })
   totalEnrollments: number;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { CourseCategory, User } from "@/generated/openapi-client";
-import { signOut } from "@/auth";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -137,7 +137,10 @@ export default function SiteHeader({
                   </Avatar>
                 </div>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-56 p-0">
+              <PopoverContent
+                align="end"
+                className="w-56 p-0 bg-white border border-gray-200 rounded-lg shadow-lg z-[100] mt-2"
+              >
                 <div className="px-4 py-3 border-b border-gray-100">
                   <div className="font-semibold text-gray-800">
                     {profile?.name || profile?.email || "내 계정"}

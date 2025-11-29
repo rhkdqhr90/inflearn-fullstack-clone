@@ -27,6 +27,16 @@ import { getLevelText } from "@/lib/level";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as api from "@/lib/api";
 import { User } from "next-auth";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 /*****************
  * Helper Utils  *
@@ -435,6 +445,9 @@ function FloatingMenu({
   user?: User;
   course: CourseDetailDto;
 }) {
+  const [isEnrolled, setIsEnrolled] = useState(course.isEnrolled);
+  const [showEnrollSuccessDialog, setShowEnrollSuccessDialog] = useState(false);
+  const router = useRouter();
   const handleCart = useCallback(() => {
     alert("장바구니 기능은 준비 중입니다.");
   }, []);
@@ -471,139 +484,228 @@ function FloatingMenu({
   const isFavoritDisabled =
     addFovriteMutation.isPending || removeFavoriteMutation.isPending;
 
+  const enrollMutation = useMutation({
+    mutationFn: () => api.enrollCourse(course.id),
+    onSuccess: () => {
+      setIsEnrolled(true);
+      //todo: 수강 신청 완료 Dialog 띄어주기
+      setShowEnrollSuccessDialog(true);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleEnroll = useCallback(() => {
+    if (isEnrolled) {
+      alert("이미 수강신청한 강의 입니다. 수강 화면으로 이동해주세요");
+      return;
+    }
+    if (!user) {
+      alert("로그인 후 이용해주세요");
+      return;
+    }
+    if (course.price > 0) {
+      alert("결제는 추후 예정입닏. 무료 강의를 이용해주세요.");
+      return;
+    }
+
+    enrollMutation.mutate();
+  }, [course, user, enrollMutation, isEnrolled]);
+
+  const handleStartLearning = () => {
+    setShowEnrollSuccessDialog(false);
+    router.push(`/courses/lecture?courseId=${course.id}`);
+  };
+
   return (
-    <aside className="lg:sticky lg:top-24 lg:self-start lg:block hidden">
-      <div className="border border-gray-200 rounded-lg overflow-hidden shadow-md w-80">
-        <div className="p-6 space-y-4 bg-white">
-          <div className="space-y-1">
-            {course.discountPrice ? (
-              <>
-                <div className="flex items-baseline gap-2">
+    <>
+      <aside className="lg:sticky lg:top-24 lg:self-start lg:block hidden">
+        <div className="border border-gray-200 rounded-lg overflow-hidden shadow-md w-80">
+          <div className="p-6 space-y-4 bg-white">
+            <div className="space-y-1">
+              {course.price > 0 &&
+                (course.discountPrice ? (
+                  <>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-bold text-gray-900">
+                        ₩{course.discountPrice.toLocaleString()}
+                      </span>
+                      <span className="text-base font-bold text-red-500">
+                        {Math.round(
+                          ((course.price - course.discountPrice) /
+                            course.price) *
+                            100
+                        )}
+                        %
+                      </span>
+                    </div>
+                    <span className="text-base line-through text-gray-400">
+                      ₩{course.price.toLocaleString()}
+                    </span>
+                  </>
+                ) : (
                   <span className="text-3xl font-bold text-gray-900">
-                    ₩{course.discountPrice.toLocaleString()}
+                    ₩{course.price.toLocaleString()}
                   </span>
-                  <span className="text-base font-bold text-red-500">
-                    {Math.round(
-                      ((course.price - course.discountPrice) / course.price) *
-                        100
-                    )}
-                    %
-                  </span>
-                </div>
-                <span className="text-base line-through text-gray-400">
-                  ₩{course.price.toLocaleString()}
-                </span>
-              </>
-            ) : (
-              <span className="text-3xl font-bold text-gray-900">
-                ₩{course.price.toLocaleString()}
-              </span>
-            )}
-          </div>
-
-          <button className="w-full py-3 px-4 rounded-md bg-[#00C471] hover:bg-[#00B366] text-white font-bold text-base transition-colors shadow-sm">
-            수강신청 하기
-          </button>
-          <button
-            onClick={handleCart}
-            className="w-full py-3 px-4 rounded-md border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 font-semibold text-gray-700 transition-colors"
-          >
-            바구니에 담기
-          </button>
-        </div>
-
-        <div className="bg-gray-50 p-6 space-y-3 text-sm border-t">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600 font-medium">지식공유자</span>
-            <span className="font-semibold text-gray-900">
-              {course.instructor.name}
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600 font-medium">강의 수</span>
-            <span className="font-semibold text-gray-900">
-              {course.totalLectures}개
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600 font-medium">강의 시간</span>
-            <span className="font-semibold text-gray-900">
-              {formatSecondsToHourMin(course.totalDuration)}
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600 font-medium">난이도</span>
-            <span className="font-semibold text-gray-900">
-              {getLevelText(course.level)}
-            </span>
-          </div>
-
-          <div className="pt-4 border-t border-gray-200">
-            <div className="flex items-center justify-around">
-              <button className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                  />
-                </svg>
-                <span className="text-xs font-medium">폴더</span>
-              </button>
-
-              <button className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                  />
-                </svg>
-                <span className="text-xs font-medium">공유</span>
-              </button>
-
+                ))}
+              {course.price === 0 && (
+                <span className="txt-2xl font-bold">무료</span>
+              )}
+            </div>
+            {isEnrolled ? (
               <button
-                onClick={handleFavorite}
-                disabled={isFavoritDisabled}
+                onClick={() =>
+                  router.push(`/courses/lecture?courseId=${course.id}`)
+                }
                 className={cn(
-                  "p-2.5 rounded-md font-medium transition-all relative cursor-pointer",
-                  getFavoriteQuery.data?.data?.isFavorite
-                    ? "border-red-500 bg-red-50"
-                    : "border-gray-300 hover:border-gray-400",
-                  isFavoritDisabled && "cursor-not-allowed"
+                  "w-full py-3 px-4 rounded-md bg-[#00C471] hover:bg-[#00B366] text-white font-bold text-base transition-colors shadow-sm",
+                  enrollMutation.isPending && "cursor-not-allowed"
                 )}
-                aria-label="즐겨찾기"
               >
-                <HeartIcon
+                학습으로 이동하기
+              </button>
+            ) : (
+              <button
+                onClick={handleEnroll}
+                disabled={enrollMutation.isPending}
+                className={cn(
+                  "w-full py-3 px-4 rounded-md bg-[#00C471] hover:bg-[#00B366] text-white font-bold text-base transition-colors shadow-sm",
+                  enrollMutation.isPending && "cursor-not-allowed"
+                )}
+              >
+                수강신청 하기
+              </button>
+            )}
+
+            <button
+              onClick={handleCart}
+              className="w-full py-3 px-4 rounded-md border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 font-semibold text-gray-700 transition-colors"
+            >
+              바구니에 담기
+            </button>
+          </div>
+
+          <div className="bg-gray-50 p-6 space-y-3 text-sm border-t">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-medium">지식공유자</span>
+              <span className="font-semibold text-gray-900">
+                {course.instructor.name}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-medium">강의 수</span>
+              <span className="font-semibold text-gray-900">
+                {course.totalLectures}개
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-medium">강의 시간</span>
+              <span className="font-semibold text-gray-900">
+                {formatSecondsToHourMin(course.totalDuration)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 font-medium">난이도</span>
+              <span className="font-semibold text-gray-900">
+                {getLevelText(course.level)}
+              </span>
+            </div>
+
+            <div className="pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-around">
+                <button className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors">
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                    />
+                  </svg>
+                  <span className="text-xs font-medium">폴더</span>
+                </button>
+
+                <button className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors">
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                    />
+                  </svg>
+                  <span className="text-xs font-medium">공유</span>
+                </button>
+
+                <button
+                  onClick={handleFavorite}
+                  disabled={isFavoritDisabled}
                   className={cn(
-                    "w-5 h-5 transition-all cursor-pointer",
+                    "p-2.5 rounded-md font-medium transition-all relative cursor-pointer",
                     getFavoriteQuery.data?.data?.isFavorite
-                      ? "fill-red-500 text-red-500"
-                      : "text-gray-700",
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300 hover:border-gray-400",
                     isFavoritDisabled && "cursor-not-allowed"
                   )}
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                />
-                {getFavoriteQuery.data?.data?.favoriteCount ?? 0}
-              </button>
+                  aria-label="즐겨찾기"
+                >
+                  <HeartIcon
+                    className={cn(
+                      "w-5 h-5 transition-all cursor-pointer",
+                      getFavoriteQuery.data?.data?.isFavorite
+                        ? "fill-red-500 text-red-500"
+                        : "text-gray-700",
+                      isFavoritDisabled && "cursor-not-allowed"
+                    )}
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  />
+                  {getFavoriteQuery.data?.data?.favoriteCount ?? 0}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+      <Dialog
+        open={showEnrollSuccessDialog}
+        onOpenChange={setShowEnrollSuccessDialog}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>수강신청 완료</DialogTitle>
+            <DialogDescription>
+              수강신청이 완료되었어요. 강의실로 이동하여 바로 학습하시겠어요?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              onClick={() => setShowEnrollSuccessDialog(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+            >
+              취소
+            </button>
+            <button
+              onClick={handleStartLearning}
+              className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-md transition-colors"
+            >
+              바로 학습 시작
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
