@@ -17,7 +17,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { Prisma } from '@prisma/client';
+
 import { Request } from 'express';
 import { Course as CourseEntity } from 'src/_gen/prisma-class/course';
 import { AccessTokenGuard } from 'src/auth/guards/access-token-guard';
@@ -30,6 +30,7 @@ import { CourseDetailDto } from './dto/course-detail.dto';
 import { OptionalAccessTokenGuard } from 'src/auth/guards/optional=access-token.guard';
 import { GetFavoriteResponseDto } from './dto/favorite.dto';
 import { CourseFavorite as CourseFavoritEntity } from 'src/_gen/prisma-class/course_favorite';
+import { LectureActivity as LectureActivityEntity } from 'src/_gen/prisma-class/lecture_activity';
 
 @ApiTags('코스')
 @Controller('courses')
@@ -48,9 +49,8 @@ export class CoursesController {
   }
 
   @Get()
-  @ApiQuery({ name: 'title', required: false })
-  @ApiQuery({ name: 'level', required: false })
-  @ApiQuery({ name: 'categoryId', required: false })
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth('access-token')
   @ApiQuery({ name: 'skip', required: false })
   @ApiQuery({ name: 'take', required: false })
   @ApiOkResponse({
@@ -58,31 +58,15 @@ export class CoursesController {
     type: CourseEntity,
     isArray: true,
   })
-  findAll(
-    @Query('title') title?: string,
-    @Query('level') level?: string,
-    @Query('categoryId') categoryId?: string,
+  findAllMyCourses(
+    @Req() req: Request,
     @Query('skip') skip?: string,
     @Query('take') take?: string,
   ) {
-    const where: Prisma.CourseWhereInput = {};
-    if (title) {
-      where.title = { contains: title, mode: 'insensitive' };
-    }
-
-    if (level) {
-      where.level = level;
-    }
-
-    if (categoryId) {
-      where.categories = {
-        some: {
-          id: categoryId,
-        },
-      };
-    }
     return this.coursesService.findAll({
-      where,
+      where: {
+        instructorId: req.user!.sub,
+      },
       skip: skip ? parseInt(skip) : undefined,
       take: take ? parseInt(take) : undefined,
       orderBy: {
@@ -99,7 +83,7 @@ export class CoursesController {
     type: CourseDetailDto,
   })
   findOne(@Req() req: Request, @Param('id', ParseUUIDPipe) id: string) {
-    return this.coursesService.findOne(id, req.user!.sub);
+    return this.coursesService.findOne(id, req.user?.sub);
   }
 
   @Patch(':id')
@@ -186,5 +170,17 @@ export class CoursesController {
   })
   enrollCourse(@Req() req: Request, @Param('id', ParseUUIDPipe) id: string) {
     return this.coursesService.enrollCourse(id, req.user!.sub);
+  }
+
+  @Get(':courseId/activity')
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOkResponse({
+    description: '개별 강의 활동 이벤트 조회',
+    type: LectureActivityEntity,
+    isArray: true,
+  })
+  getLectureActivity(@Req() req: Request, @Param('courseId') courseId: string) {
+    return this.coursesService.getAllLectureActivities(courseId, req.user!.sub);
   }
 }

@@ -36,7 +36,7 @@ export default async function RootLayout({
     <html lang="en">
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased  `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased max-w-7xl mx-auto`}
       >
         <Providers>
           <SiteHeader
@@ -44,7 +44,7 @@ export default async function RootLayout({
             profile={profile?.data}
             categories={categories.data ?? []}
           ></SiteHeader>
-          <main className="overflow-x-hidden">{children}</main>
+          <main>{children}</main>
         </Providers>
         <Toaster />
       </body>

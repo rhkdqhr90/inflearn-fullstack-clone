@@ -37,9 +37,9 @@ export default function SiteHeader({
 }) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const pathname = usePathname();
-  const isSiteHeaderNeeded = !pathname.match(
-    /^\/course\/[0-9a-f-]+(\/edit|\/edit\/.*)$/
-  );
+  const isSiteHeaderNeeded =
+    !pathname.match(/^\/course\/[0-9a-f-]+(\/edit|\/edit\/.*)$/) &&
+    !pathname.match(/^\/courses\/lecture/);
   const [search, setSearch] = useState("");
 
   const router = useRouter();
@@ -49,7 +49,10 @@ export default function SiteHeader({
     pathname == "/" ||
     pathname.includes("/courses") ||
     pathname.includes("/search");
-  const isInstructorPage = pathname?.includes("/");
+  const isInstructorPage =
+    pathname?.includes("/instructor") ||
+    pathname?.includes("/course") ||
+    pathname?.includes("/create_course");
 
   return (
     <header className="w-full bg-white border-b border-gray-200">
@@ -70,7 +73,7 @@ export default function SiteHeader({
         {/* 네비게이션 메뉴 */}
         <nav className="flex items-center gap-6">
           <Link
-            href="/lectures"
+            href="/"
             className="flex items-center gap-1.5 text-gray-700 hover:text-green-600 transition-colors"
           >
             <Play className="w-4 h-4" />

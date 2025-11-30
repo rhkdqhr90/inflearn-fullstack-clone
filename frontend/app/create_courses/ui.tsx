@@ -34,7 +34,11 @@ export default function UI() {
         className="bg-[#f6f6f6] py-6 rounded-xs"
       />
       <div className="space-x-2">
-        <Button variant={"outline"} className="px-8 py-6 text-lg font-bold">
+        <Button
+          variant={"outline"}
+          className="px-8 py-6 text-lg font-bold"
+          onClick={() => router.push(`/instructor`)}
+        >
           이전
         </Button>
         <Button

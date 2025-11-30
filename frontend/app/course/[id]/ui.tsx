@@ -97,59 +97,55 @@ function StarRating({ rating }: { rating: number }) {
 
 function Header({ course }: { course: CourseDetailDto }) {
   return (
-    <div className="relative overflow-hidden mb-8">
-      <div className="absolute bg-[#0F1415] top-0 bottom-0 w-full -z-10"></div>
-      <div className="container mx-auto px-4 py-10">
-        <div className="flex flex-col-reverse lg:flex-row lg:items-start lg:justify-between gap-8">
-          <div className="flex-1 text-white">
-            {course.categories?.[0] && (
-              <p className="text-sm text-gray-400 mb-2">
-                {course.categories[0].name}
-              </p>
-            )}
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
-              {course.title}
-            </h1>
-            {course.shortDescription && (
-              <p className="text-base md:text-lg text-gray-300 mb-6 leading-relaxed">
-                {course.shortDescription}
-              </p>
-            )}
-            <div className="flex flex-wrap items-center gap-2 text-sm mb-3">
-              <StarRating rating={course.averageRating} />
-              <span className="font-medium">
-                {course.averageRating.toFixed(1)}
-              </span>
-              <span className="text-gray-400">
-                ({course.totalReviews}개 수강평)
-              </span>
-              <span className="hidden md:inline text-gray-500">·</span>
-              <span className="text-gray-300">
-                수강생 {course.totalEnrollments.toLocaleString()}명
-              </span>
-            </div>
-            <p className="text-sm text-gray-400">by {course.instructor.name}</p>
-          </div>
-          {course.thumbnailUrl && (
-            <div className="relative w-full lg:w-[400px] flex-shrink-0">
-              <Image
-                src={course.thumbnailUrl}
-                alt={course.title}
-                width={400}
-                height={225}
-                className="rounded-lg w-full h-auto object-cover shadow-lg"
-              />
-              <button
-                className="absolute inset-0 flex items-center justify-center"
-                aria-label="preview"
-              >
-                <PlayCircleIcon className="size-16 text-white/90 drop-shadow-lg hover:text-white transition-colors" />
-              </button>
-            </div>
-          )}
+    <header className="relative mb-10 text-white rounded-md p-8 flex flex-col-reverse md:flex-row md:items-center gap-6">
+      <div className="absolute bg-[#0F1415] top-0 bottom-0 w-screen left-1/2 -translate-x-1/2 -z-10"></div>
+
+      {/* Left */}
+      <div className="flex-1 ">
+        {course.categories?.[0] && (
+          <p className="text-sm text-muted-foreground mb-1">
+            {course.categories[0].name}
+          </p>
+        )}
+        <h1 className="text-3xl md:text-4xl font-bold mb-3">{course.title}</h1>
+        {course.shortDescription && (
+          <p className="text-lg text-muted-foreground mb-4">
+            {course.shortDescription}
+          </p>
+        )}
+        <div className="flex flex-wrap items-center gap-2 text-sm mb-2">
+          <StarRating rating={course.averageRating} />
+          <span className="font-medium">{course.averageRating.toFixed(1)}</span>
+          <span className="text-muted-foreground">
+            ({course.totalReviews}개 수강평)
+          </span>
+          <span className="hidden md:inline">·</span>
+          <span>수강생 {course.totalEnrollments.toLocaleString()}명</span>
         </div>
+        <p className="text-sm text-muted-foreground">
+          by {course.instructor.name}
+        </p>
       </div>
-    </div>
+      {/* Thumbnail */}
+      {course.thumbnailUrl && (
+        <div className="relative w-full md:w-64 flex-shrink-0">
+          <Image
+            src={course.thumbnailUrl}
+            alt={course.title}
+            width={256}
+            height={144}
+            className="rounded-md w-full h-auto object-cover"
+          />
+          {/* Play button overlay */}
+          <button
+            className="absolute inset-0 flex items-center justify-center"
+            aria-label="preview"
+          >
+            <PlayCircleIcon className="size-16 text-white/90 drop-shadow-lg" />
+          </button>
+        </div>
+      )}
+    </header>
   );
 }
 
@@ -242,16 +238,26 @@ function Introduction({ course }: { course: CourseDetailDto }) {
 }
 
 function LectureRow({
+  courseId,
   lecture,
   className,
 }: {
+  courseId: string;
   lecture: LectureEntity;
   className?: string;
 }) {
+  const router = useRouter();
+  console.log(lecture.videoStorageInfo);
   return (
     <div
+      onClick={() => {
+        router.push(
+          `/courses/lecture?courseId=${courseId}&lectureId=${lecture.id}`
+        );
+      }}
       className={cn(
         "flex items-center justify-between text-sm px-5 py-3 hover:bg-gray-50 transition-colors",
+        lecture.videoStorageInfo && "cursor-pointer",
         className
       )}
     >
@@ -261,14 +267,13 @@ function LectureRow({
         ) : (
           <LockIcon className="size-4 text-gray-400" />
         )}
-        <span className="text-gray-900">{lecture.title}</span>
+        <span className={lecture.videoStorageInfo && "underline"}>
+          {lecture.title}
+        </span>
       </div>
       <div className="flex items-center gap-3">
         {lecture.isPreview && (
-          <button
-            onClick={() => alert("구현 예정")}
-            className="cursor-pointer text-xs px-3 py-1.5 border border-gray-300 text-gray-700 font-semibold rounded hover:border-gray-400 transition-colors"
-          >
+          <button className="cursor-pointer text-xs px-3 py-1.5 border border-gray-300 text-gray-700 font-semibold rounded hover:border-gray-400 transition-colors">
             미리보기
           </button>
         )}
@@ -280,7 +285,13 @@ function LectureRow({
   );
 }
 
-function Curriculum({ sections }: { sections: SectionEntity[] }) {
+function Curriculum({
+  courseId,
+  sections,
+}: {
+  courseId: string;
+  sections: SectionEntity[];
+}) {
   return (
     <section id="curriculum" className="mt-16">
       <h2 className="text-2xl font-bold mb-8 text-gray-900">커리큘럼</h2>
@@ -304,6 +315,7 @@ function Curriculum({ sections }: { sections: SectionEntity[] }) {
                     .sort((a, b) => a.order - b.order)
                     .map((lecture, idx) => (
                       <LectureRow
+                        courseId={courseId}
                         key={lecture.id}
                         lecture={lecture}
                         className={cn(
@@ -506,7 +518,7 @@ function FloatingMenu({
       return;
     }
     if (course.price > 0) {
-      alert("결제는 추후 예정입닏. 무료 강의를 이용해주세요.");
+      alert("결제는 추후 예정입니다. 무료 강의를 이용해주세요.");
       return;
     }
 
@@ -814,14 +826,14 @@ export default function CourseDetailUI({
   user?: User;
 }) {
   return (
-    <div className="overflow-x-hidden pb-24 lg:pb-12">
+    <div className="b-10 pb-24 lg:pb-12">
       <Header course={course} />
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12">
           <div className="w-full max-w-4xl">
             <Introduction course={course} />
             <InstructorBio instructor={course.instructor} />
-            <Curriculum sections={course.sections} />
+            <Curriculum courseId={course.id} sections={course.sections} />
             <ReviewsSection reviews={course.reviews} />
           </div>
           <FloatingMenu user={user} course={course} />
