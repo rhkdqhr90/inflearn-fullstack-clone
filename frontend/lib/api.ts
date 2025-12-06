@@ -50,6 +50,13 @@ import {
   commentsControllerRemove,
   questionsControllerRemove,
   questionsControllerFindAllByInstructorId,
+  cartsControllerAddToCart,
+  cartsControllerGetCartItems,
+  cartsControllerClearCart,
+  cartsControllerRemoveFromCart,
+  VerifyPaymentDto,
+  paymentsControllerVerifyPayment,
+  coursesControllerFindAllInstructorCourses,
 } from "@/generated/openapi-client";
 
 export const getAllCategories = async () => {
@@ -61,6 +68,14 @@ export const getAllCategories = async () => {
   };
 };
 export const getAllInstructorCourses = async () => {
+  const { data, error } = await coursesControllerFindAllInstructorCourses();
+  return {
+    data,
+    error,
+  };
+};
+
+export const getAllMyCourses = async () => {
   const { data, error } = await coursesControllerFindAllMyCourses();
   return {
     data,
@@ -450,6 +465,47 @@ export const removeComment = async (commentId: string) => {
 
 export const getAllInstructorQuestions = async () => {
   const { data, error } = await questionsControllerFindAllByInstructorId({});
+
+  return { data, error };
+};
+export const addToCart = async (courseId: string) => {
+  const { data, error } = await cartsControllerAddToCart({
+    body: {
+      courseId,
+    },
+  });
+  console.log(data, error);
+
+  return { data, error };
+};
+
+export const getCartItems = async () => {
+  const { data, error } = await cartsControllerGetCartItems();
+  console.log(data);
+
+  return { data, error };
+};
+
+export const removeFromCart = async (courseId: string) => {
+  const { data, error } = await cartsControllerRemoveFromCart({
+    path: {
+      courseId,
+    },
+  });
+
+  return { data, error };
+};
+
+export const clearCart = async () => {
+  const { data, error } = await cartsControllerClearCart();
+
+  return { data, error };
+};
+
+export const verifyPayment = async (verifyPaymentDto: VerifyPaymentDto) => {
+  const { data, error } = await paymentsControllerVerifyPayment({
+    body: verifyPaymentDto,
+  });
 
   return { data, error };
 };

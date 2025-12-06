@@ -27,7 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { getLevelText } from "@/lib/level";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as api from "@/lib/api";
 import { User } from "next-auth";
 import { toast } from "sonner";
@@ -696,7 +696,7 @@ function LectureRow({
   className?: string;
 }) {
   const router = useRouter();
-  console.log(lecture.videoStorageInfo);
+
   return (
     <div
       onClick={() => {
@@ -792,9 +792,45 @@ function FloatingMenu({
   const [isEnrolled, setIsEnrolled] = useState(course.isEnrolled);
   const [showEnrollSuccessDialog, setShowEnrollSuccessDialog] = useState(false);
   const router = useRouter();
-  const handleCart = useCallback(() => {
-    alert("장바구니 기능은 준비 중입니다.");
-  }, []);
+  const queryClient = useQueryClient();
+
+  const cartItemsQuery = useQuery({
+    queryKey: ["cart-items"],
+    queryFn: () => api.getCartItems(),
+  });
+
+  const addToCartMutation = useMutation({
+    mutationFn: () => api.addToCart(course.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart-items"] });
+      toast.success(`"${course.title}"이(가) 장바구니에 담겼습니다.`);
+    },
+  });
+
+  const handleCart = useCallback(async () => {
+    if (!user) {
+      alert("로그인 후 이용해주세요.");
+      return;
+    }
+    const res = await api.addToCart(course.id);
+
+    if (res.error) {
+      const msg =
+        (res.error as any).message || "장바구니 추가 중 오류가 발생했습니다.";
+      toast.error(msg);
+    }
+
+    if (
+      cartItemsQuery.data?.data?.items?.some(
+        (item) => item.courseId === course.id
+      )
+    ) {
+      // 이미 장바구니에 있다면 장바구니 페이지로 이동
+      router.push("/carts");
+    } else {
+      addToCartMutation.mutate();
+    }
+  }, [user, cartItemsQuery.data, course.title, router]);
 
   const getFavoriteQuery = useQuery({
     queryKey: ["favorite", course.id],
@@ -926,7 +962,11 @@ function FloatingMenu({
               onClick={handleCart}
               className="w-full py-3 px-4 rounded-md border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 font-semibold text-gray-700 transition-colors"
             >
-              바구니에 담기
+              {cartItemsQuery.data?.data?.items?.some(
+                (item) => item.courseId === course.id
+              )
+                ? "수강 바구니로 이동"
+                : "바구니에 담기"}
             </button>
           </div>
 

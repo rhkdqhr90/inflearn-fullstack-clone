@@ -12,6 +12,8 @@ import { MediaModule } from './media/media.module';
 import { UsersModule } from './users/users.module';
 import { CommentsModule } from './comments/comments.module';
 import { QuestionsModule } from './questions/questions.module';
+import { CartsModule } from './carts/carts.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { QuestionsModule } from './questions/questions.module';
     UsersModule,
     CommentsModule,
     QuestionsModule,
+    CartsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

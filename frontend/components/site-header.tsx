@@ -4,6 +4,7 @@ import { CourseCategory, User } from "@/generated/openapi-client";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 import {
   Play,
   Flag,
@@ -13,6 +14,8 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  ShoppingCart,
+  Layers,
 } from "lucide-react";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -25,6 +28,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { CATEGORY_ICONS } from "@/app/constants/category-icons";
 import { Session } from "next-auth";
 import { Button } from "./ui/button";
+import { useQuery } from "@tanstack/react-query";
+import * as api from "@/lib/api";
 
 export default function SiteHeader({
   session,
@@ -44,7 +49,30 @@ export default function SiteHeader({
 
   const router = useRouter();
 
+  const cartItemsQuery = useQuery({
+    queryFn: () => api.getCartItems(),
+    queryKey: ["cart-items"],
+  });
+
+  // 최신 3개 아이템만 표시
+  const recentCartItems =
+    cartItemsQuery?.data?.data?.items
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      .slice(0, 3) ?? [];
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("ko-KR").format(price);
+  };
+
   if (!isSiteHeaderNeeded) return null;
+
+  if (cartItemsQuery.isLoading) {
+    return <div>로딩중...</div>;
+  }
+
   const isCategoryNeeded =
     pathname == "/" ||
     pathname.includes("/courses") ||
@@ -119,6 +147,98 @@ export default function SiteHeader({
               지식공유자
             </Button>
           </Link>
+          {/* 장바구니 아이콘 + Popover */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {/* 🔴 장바구니 개수 뱃지 */}
+                {(() => {
+                  const count = cartItemsQuery?.data?.data?.totalCount ?? 0;
+                  if (count <= 0) return null;
+                  return (
+                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 min-w-[20px] flex items-center justify-center px-1 z-10">
+                      {count > 9 ? "9+" : count}
+                    </div>
+                  );
+                })()}
+              </Button>
+            </PopoverTrigger>
+
+            <PopoverContent
+              className="w-80 p-0 bg-white border border-gray-200 shadow-lg z-[9999] rounded-lg overflow-hidden"
+              align="end"
+              sideOffset={8}
+            >
+              <div className="p-4 border-b border-gray-200 bg-white rounded-t-lg">
+                <h3 className="font-semibold text-gray-900">수강바구니</h3>
+              </div>
+
+              {cartItemsQuery?.data?.data?.totalCount === 0 ? (
+                <div className="p-8 text-center text-gray-500 bg-white">
+                  장바구니가 비어있습니다.
+                </div>
+              ) : (
+                <>
+                  <div className="max-h-[400px] overflow-y-auto bg-white">
+                    {recentCartItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        onClick={() =>
+                          router.push(`/courses/${item.course.id}`)
+                        }
+                      >
+                        <div className="flex gap-3">
+                          {item.course.thumbnailUrl && (
+                            <img
+                              src={item.course.thumbnailUrl}
+                              alt={item.course.title}
+                              className="w-20 h-14 object-cover rounded flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm text-gray-900 line-clamp-2 mb-1">
+                              {item.course.title}
+                            </h4>
+                            <p className="text-xs text-gray-600 mb-2">
+                              {item.course.instructor.name}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              {item.course.discountPrice &&
+                              item.course.discountPrice < item.course.price ? (
+                                <>
+                                  <span className="font-bold text-sm text-gray-900">
+                                    ₩{formatPrice(item.course.discountPrice)}
+                                  </span>
+                                  <span className="text-xs text-gray-400 line-through">
+                                    ₩{formatPrice(item.course.price)}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="font-bold text-sm text-gray-900">
+                                  ₩{formatPrice(item.course.price)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-4 border-t border-gray-200 bg-white rounded-b-lg">
+                    <Button
+                      onClick={() => router.push("/carts")}
+                      className="w-full bg-[#1dc078] hover:bg-[#1dc078]/90 text-white font-medium"
+                    >
+                      수강바구니에서 전체보기
+                    </Button>
+                  </div>
+                </>
+              )}
+            </PopoverContent>
+          </Popover>
           {session ? (
             <Popover>
               <PopoverTrigger asChild>
