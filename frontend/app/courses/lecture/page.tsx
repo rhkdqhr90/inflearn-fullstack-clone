@@ -19,12 +19,14 @@ export default async function LecturePage({
   if (!course.data || course.error) {
     notFound();
   }
+  console.log("UI received user:", session?.user);
 
   return (
     <UI
       course={course.data}
       lectureId={lectureId}
-      lectureActivities={lectureActivities.data}
+      lectureActivities={lectureActivities.data ?? []}
+      user={session?.user}
     />
   );
 }

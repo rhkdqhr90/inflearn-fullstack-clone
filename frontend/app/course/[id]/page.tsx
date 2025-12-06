@@ -11,6 +11,7 @@ export default async function CoursePage({
   const session = await auth();
   const { id } = await params;
   const course = await api.getCourseById(id);
+  
 
   if (!course.data || course.error) {
     notFound();

@@ -26,11 +26,11 @@ const sidebarItems = [
   },
   {
     label: "강의 질문 관리",
-    href: "/instructor#",
+    href: "/instructor/questions",
   },
   {
     label: "수강평 리스트",
-    href: "/instructor#",
+    href: "/instructor/reviews",
   },
   {
     label: "새소식 관리",

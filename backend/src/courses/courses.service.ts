@@ -17,6 +17,11 @@ import { SearchCourseDto } from './dto/search-course.dto';
 import { CourseDetailDto } from './dto/course-detail.dto';
 import { CourseFavorite as CourseFavoriteEntity } from 'src/_gen/prisma-class/course_favorite';
 import { GetFavoriteResponseDto } from './dto/favorite.dto';
+import { CreateReviewDto } from './dto/create-review.dto';
+import { CourseReview as CourseReviewEntity } from 'src/_gen/prisma-class/course_review';
+import { UpdateReviewDto } from './dto/update-review.dto';
+import { InstructorReplyDto } from './dto/instructor-reply.dto';
+import { CourseReviewsResponseDto } from './dto/course-review-response.dto';
 @Injectable()
 export class CoursesService {
   constructor(private prisma: PrismaService) {}
@@ -424,5 +429,231 @@ export class CoursesService {
     });
 
     return courseActivities;
+  }
+
+  async getCourseReviews(
+    courseId: string,
+    page: number,
+    pageSize: number,
+    sort: 'latest' | 'oldest' | 'rating_high' | 'rating_low',
+    userId?: string,
+  ): Promise<CourseReviewsResponseDto> {
+    const where: Prisma.CourseReviewWhereInput = {
+      courseId,
+    };
+    const orderBy: Prisma.CourseReviewOrderByWithRelationInput = {};
+
+    if (sort === 'latest') {
+      orderBy.createdAt = 'desc';
+    } else if (sort === 'oldest') {
+      orderBy.createdAt = 'asc';
+    } else if (sort === 'rating_high') {
+      orderBy.rating = 'desc';
+    } else if (sort === 'rating_low') {
+      orderBy.rating = 'asc';
+    }
+
+    const skip = (page - 1) * pageSize;
+    const totalItems = await this.prisma.courseReview.count({ where });
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const hasNext = page < totalPages;
+    const hasPrev = page > 1;
+
+    const myReview =
+      userId &&
+      (await this.prisma.courseReview.findUnique({
+        where: {
+          userId_courseId: {
+            userId,
+            courseId,
+          },
+        },
+      }));
+    const reviews = await this.prisma.courseReview.findMany({
+      where,
+      orderBy,
+      skip,
+      take: pageSize,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+      },
+    });
+
+    return {
+      myReviewExists: !!myReview,
+      totalReviewCount: totalItems,
+      currentPage: page,
+      pageSize,
+      totalPages,
+      hasNext,
+      hasPrev,
+      reviews: reviews as unknown as CourseReviewEntity[],
+    };
+  }
+
+  async createReview(
+    courseId: string,
+    userId: string,
+    createReviewDto: CreateReviewDto,
+  ): Promise<CourseReviewEntity> {
+    const course = await this.prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+    });
+    if (!course) {
+      throw new NotFoundException(`${courseId}를 코스를 찾지 못했습니다.`);
+    }
+    const enrollment = await this.prisma.courseEnrollment.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        },
+      },
+    });
+    if (!enrollment) {
+      throw new UnauthorizedException(
+        '수강신청한 강의만 리뷰를 작성 할 수 있습니다.',
+      );
+    }
+    const existingReview = await this.prisma.courseReview.findFirst({
+      where: {
+        userId,
+        courseId,
+      },
+    });
+    if (existingReview) {
+      throw new ConflictException('이미 리뷰를 작성한 강의 입니다.');
+    }
+
+    const review = await this.prisma.courseReview.create({
+      data: {
+        content: createReviewDto.content,
+        rating: createReviewDto.rating,
+
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        course: {
+          connect: {
+            id: courseId,
+          },
+        },
+      },
+    });
+    return review as unknown as CourseReviewEntity;
+  }
+
+  async updateReview(
+    reviewId: string,
+    userId: string,
+    updateReviewDto: UpdateReviewDto,
+  ): Promise<CourseReviewEntity> {
+    const existingReview = await this.prisma.courseReview.findFirst({
+      where: {
+        id: reviewId,
+      },
+    });
+    if (!existingReview) {
+      throw new ConflictException('작성하신 리뷰가 존재하지 않습니다.');
+    }
+    if (existingReview.userId !== userId) {
+      throw new UnauthorizedException('작성하신 리뷰만 수정할 수 있습니다.');
+    }
+    const updatedReview = await this.prisma.courseReview.update({
+      where: {
+        id: reviewId,
+      },
+      data: {
+        content: updateReviewDto.content,
+        rating: updateReviewDto.rating,
+      },
+    });
+    return updatedReview as unknown as CourseReviewEntity;
+  }
+  async deleteReview(reviewId: string, userId: string): Promise<boolean> {
+    const existingReview = await this.prisma.courseReview.findFirst({
+      where: {
+        id: reviewId,
+      },
+    });
+    if (!existingReview) {
+      throw new ConflictException('작성하신 리뷰가 존재하지 않습니다.');
+    }
+    if (existingReview.userId !== userId) {
+      throw new UnauthorizedException('작성하신 리뷰만 삭제할 수 있습니다.');
+    }
+    await this.prisma.courseReview.delete({
+      where: { id: reviewId },
+    });
+    return true;
+  }
+
+  async createInstructorReply(
+    reviewId: string,
+    userId: string,
+    instructorReplyDto: InstructorReplyDto,
+  ): Promise<CourseReviewEntity> {
+    const review = await this.prisma.courseReview.findUnique({
+      where: { id: reviewId },
+      include: {
+        course: {
+          select: {
+            instructorId: true,
+          },
+        },
+      },
+    });
+    if (!review) {
+      throw new ConflictException('작성하신 리뷰가 존재하지 않습니다.');
+    }
+    if (review.course.instructorId !== userId) {
+      throw new UnauthorizedException('이미 강사만 답변 할 수 있습니다.');
+    }
+    const updatedReview = await this.prisma.courseReview.update({
+      where: { id: reviewId },
+      data: {
+        instructorReply: instructorReplyDto.instructorReply,
+      },
+    });
+    return updatedReview as unknown as CourseReviewEntity;
+  }
+
+  async getInstructorReviews(userId: string): Promise<CourseReviewEntity[]> {
+    const reviews = await this.prisma.courseReview.findMany({
+      where: {
+        course: {
+          instructorId: userId,
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+        course: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return reviews as unknown as CourseReviewEntity[];
   }
 }
