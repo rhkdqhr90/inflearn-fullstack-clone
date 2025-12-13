@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { CourseCommnet as CourseCommentEntity } from 'src/_gen/prisma-class/course_commnet';
+import { CourseComment as CourseCommentEntity } from 'src/_gen/prisma-class/course_comment';
 import { Request } from 'express';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
