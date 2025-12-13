@@ -501,8 +501,8 @@ export const clearCart = async () => {
 
   return { data, error };
 };
-
 export const verifyPayment = async (verifyPaymentDto: VerifyPaymentDto) => {
+  console.log(verifyPaymentDto);
   const { data, error } = await paymentsControllerVerifyPayment({
     body: verifyPaymentDto,
   });

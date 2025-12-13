@@ -8,33 +8,36 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
-import { AccessTokenGuard } from 'src/auth/guards/access-token-guard';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
-import { Request } from 'express';
 
+import { Request } from 'express';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AccessTokenGuard } from 'src/auth/guards/access-token-guard';
+
+@ApiTags('결제')
 @Controller('payments')
 export class PaymentsController {
   private readonly logger = new Logger(PaymentsController.name);
+
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('verify')
   @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth('access-token')
   async verifyPayment(
-    @Body() veryfyPaymentDto: VerifyPaymentDto,
+    @Body() verifyPaymentDto: VerifyPaymentDto,
     @Req() req: Request,
   ) {
-    return await this.paymentsService.verifyPayment(
-      veryfyPaymentDto,
-      req.user!.sub,
-    );
+    console.log('verifyPaymentDto', verifyPaymentDto);
+    return this.paymentsService.verifyPayment(verifyPaymentDto, req.user!.sub);
   }
 
   @Post('webhook')
-  async handlWebook(
+  async handleWebook(
     @Body() body: string,
-    @Headers() heeaders: Record<string, string>,
+    @Headers() headers: Record<string, string>,
   ) {
     this.logger.log('Payment webook 받음');
-    return await this.paymentsService.handleWebhook(body, heeaders);
+    return this.paymentsService.handleWebhook(body, headers);
   }
 }

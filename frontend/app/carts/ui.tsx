@@ -99,9 +99,11 @@ export default function CartUI() {
   };
 
   const handlePayment = async () => {
-    if (selectedCartItems.length == 0) {
-      alert("결제할 강의를 선택해 주세요");
+    if (selectedItems.length === 0) {
+      alert("결제할 강의를 선택해주세요");
+      return;
     }
+
     if (
       !customerInfo.customerEmail ||
       !customerInfo.customerName ||
@@ -110,7 +112,9 @@ export default function CartUI() {
       alert("구매자 정보를 모두 입력해주세요.");
       return;
     }
+
     setIsPaymentProcessing(true);
+
     try {
       const paymentId = generatePaymentId();
       const orderName =
@@ -118,15 +122,17 @@ export default function CartUI() {
           ? selectedCartItems[0].course.title
           : `${selectedCartItems[0].course.title} 외 ${
               selectedCartItems.length - 1
-            } 개`;
+            }개`;
+
       const payment = await PortOne.requestPayment({
         storeId: process.env.NEXT_PUBLIC_PORTONE_STORE_ID || "store-test",
-        channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY,
+        channelKey:
+          process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY || "channel-test-key",
         paymentId,
         orderName,
         totalAmount: totalDiscountPrice,
         currency: "CURRENCY_KRW",
-        payMethod: "CARD",
+        payMethod: "EASY_PAY",
         customer: {
           fullName: customerInfo.customerName,
           email: customerInfo.customerEmail,
@@ -140,22 +146,28 @@ export default function CartUI() {
           customerInfo,
         },
       });
+      console.log(payment);
       if (!payment || payment.code !== undefined) {
-        alert(`결제 실패 : ${payment?.message || "알수 없는 오류"}`);
+        alert(`결제 실패: ${payment?.message || "알 수 없는 오류"}`);
         return;
       }
+
       const result = await api.verifyPayment({ paymentId });
+
       console.log("Payment 결과", result);
+
       if ((result.data as any)["success"]) {
-        toast.success("결제가 완료 되었습니다.");
+        toast.success("결제가 완료되었습니다!");
         queryClient.invalidateQueries({ queryKey: ["cart-items"] });
-        router.push("/my.course");
+        router.push("/my/courses");
       } else {
-        alert(`결제 검증 실패: ${result.data as any["message"]}`);
+        alert(`결제 검증 실패: ${(result.data as any)["message"]}`);
       }
     } catch (error) {
       console.error("결제 오류", error);
-      alert("결제중 오류가 발생 했습니다. 다시 시도해 주세요");
+      alert("결제 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsPaymentProcessing(false);
     }
   };
 
@@ -356,27 +368,6 @@ export default function CartUI() {
             </div>
           </div>
 
-          {/* 쿠폰 (구현 예정이므로 주석처리)
-          <div className="border rounded-lg p-6 bg-white">
-            <h3 className="font-semibold mb-4">쿠폰</h3>
-            <div className="flex gap-2">
-              <Input placeholder="쿠폰명을 입력해 주세요" className="flex-1" />
-              <Button variant="outline">쿠폰선택</Button>
-            </div>
-          </div>
-          */}
-
-          {/* 포인트 (구현 예정이므로 주석처리)
-          <div className="border rounded-lg p-6 bg-white">
-            <h3 className="font-semibold mb-4">포인트</h3>
-            <div className="flex gap-2">
-              <Input placeholder="1,000원 이상 사용" className="flex-1" />
-              <Button variant="outline">전액사용</Button>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">보유 0</p>
-          </div>
-          */}
-
           {/* 총 결제 금액 */}
           <div className="border rounded-lg p-6 bg-white">
             <h3 className="font-semibold mb-4">총 결제 금액</h3>
@@ -403,7 +394,7 @@ export default function CartUI() {
               disabled={isPaymentProcessing}
               className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-3"
             >
-              {isPaymentProcessing ? "결제 진행중" : "결제하기"}
+              {isPaymentProcessing ? "결제 진행중..." : "결제하기"}
             </Button>
           </div>
         </div>

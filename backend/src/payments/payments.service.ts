@@ -41,10 +41,16 @@ export class PaymentsService {
       if (payment.status !== 'PAID') {
         throw new BadRequestException('결제가 완료되지 않았습니다.');
       }
-      const customData = payment.customData
-        ? (JSON.parse(payment.customData) as CustomData)
-        : null;
+      let customData: CustomData | null = null;
 
+      if (payment.customData) {
+        if (typeof payment.customData === 'string') {
+          customData = JSON.parse(payment.customData) as CustomData;
+        } else {
+          // 이미 객체인 경우 그대로 사용
+          customData = payment.customData as unknown as CustomData;
+        }
+      }
       if (!customData || !customData.items) {
         throw new BadRequestException('주문 정보가 없습니다.');
       }
