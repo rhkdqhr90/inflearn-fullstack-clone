@@ -6,6 +6,7 @@ import * as api from "@/lib/api";
 import SiteHeader from "@/components/site-header";
 import { Toaster } from "sonner";
 import { auth } from "@/auth";
+import { InquiryFloatingButton } from "@/components/inquiry/Inquiry-floation-button";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -45,6 +46,7 @@ export default async function RootLayout({
             categories={categories.data ?? []}
           ></SiteHeader>
           <main>{children}</main>
+          <InquiryFloatingButton />
         </Providers>
         <Toaster />
       </body>

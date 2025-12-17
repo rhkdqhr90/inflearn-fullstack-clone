@@ -30,6 +30,7 @@ import { Session } from "next-auth";
 import { Button } from "./ui/button";
 import { useQuery } from "@tanstack/react-query";
 import * as api from "@/lib/api";
+import { HomeBannerSlider } from "./home-bannerside";
 
 export default function SiteHeader({
   session,
@@ -44,7 +45,8 @@ export default function SiteHeader({
   const pathname = usePathname();
   const isSiteHeaderNeeded =
     !pathname.match(/^\/course\/[0-9a-f-]+(\/edit|\/edit\/.*)$/) &&
-    !pathname.match(/^\/courses\/lecture/);
+    !pathname.match(/^\/courses\/lecture/) &&
+    pathname !== "/channeltalk";
   const [search, setSearch] = useState("");
 
   const router = useRouter();
@@ -83,7 +85,7 @@ export default function SiteHeader({
     pathname?.includes("/create_course");
 
   return (
-    <header className="w-full bg-white border-b border-gray-200">
+    <header className="w-full bg-white  border-gray-200">
       {/* 첫째 줄: 로고, 네비게이션, 지식공유, 아바타 */}
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* 로고 */}
@@ -347,38 +349,8 @@ export default function SiteHeader({
           </div>
         </div>
       )}
-      {/* 셋째 줄: 슬라이드뷰 (배너) */}
-      {!isInstructorPage && (
-        <div className="container mx-auto px-4 py-4">
-          <div className="relative w-full h-64 bg-green-800 rounded-lg flex items-center justify-center">
-            <div className="text-center text-white">
-              <p className="text-lg mb-2">
-                7년차 엔지니어 최나실 멘토와 함께하는
-              </p>
-              <p className="text-2xl font-bold mb-2">
-                프론트엔드 개발자를 위한
-              </p>
-              <p className="text-xl">실무기반 소수정예 4주 챌린지</p>
-            </div>
-            {/* 슬라이더 네비게이션 */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2">
-              <button className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 rounded transition-colors">
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <div className="flex gap-1">
-                <div className="w-2 h-0.5 bg-white"></div>
-                <div className="w-2 h-0.5 bg-white/50"></div>
-                <div className="w-2 h-0.5 bg-white/50"></div>
-              </div>
-              <button className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 rounded transition-colors">
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       {/* 넷째 줄: 카테고리 리스트 */}
-      <div className="header-bottom bg-white">
+      <div className="header-bottom border-b bg-white">
         {isCategoryNeeded && (
           <nav className="category-nav container mx-auto flex flex-wrap justify-center gap-x-6 gap-y-4 py-4 px-4 items-center">
             {categories.map((category) => (
@@ -397,6 +369,7 @@ export default function SiteHeader({
           </nav>
         )}
       </div>
+      {!isInstructorPage && <HomeBannerSlider />}
     </header>
   );
 }
