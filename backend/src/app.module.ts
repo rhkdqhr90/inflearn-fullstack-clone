@@ -16,6 +16,7 @@ import { CartsModule } from './carts/carts.module';
 import { PaymentsModule } from './payments/payments.module';
 import { BatchModule } from './batch/batch.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ChallengesModule } from './challenges/challenges.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     CartsModule,
     PaymentsModule,
     BatchModule,
+    ChallengesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

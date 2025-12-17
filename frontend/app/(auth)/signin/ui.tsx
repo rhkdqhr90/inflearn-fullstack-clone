@@ -12,11 +12,18 @@ export default function UI() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    signIn("credentials", {
+    const res = await signIn("credentials", {
       email,
       password,
-      redirectTo: "/",
+      redirect: false,
     });
+    if (res?.error) {
+      alert("아이디 또는 비밀번호가 올바르지 않습니다.");
+      return;
+    }
+
+    // 로그인 성공
+    window.location.href = "/";
   };
 
   return (

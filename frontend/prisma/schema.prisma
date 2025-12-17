@@ -67,6 +67,7 @@ model User {
   courseFavorites CourseFavorite[]
   cartItems CartItem[]
   orders Order[]
+  challengeParticipations ChallengeParticipant[]
 
   @@map("users")
 }
@@ -107,6 +108,7 @@ model Course {
   lectureActivities LectureActivity[]
   cartItems CartItem[]
   orderItems OrderItem[]
+  challenge Challenge?
 
   @@map("courses")
 }
@@ -335,4 +337,52 @@ model Payment{
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("payments")
+}
+
+model DaulyPaymentStats {
+  id String @id @default(uuid())
+  data DateTime @unique @db.Date
+  totalPayments Int @default(0) @map("total_payment")
+  totalAmount Int @default(0) @map("total_amount")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  @@map("daily_payment_stats")
+}
+
+model Challenge{
+  id String @id @default(uuid())
+  courseId String @unique @map("courseId")
+
+  maxParticipants Int @map("max_participants")
+  currentParticipants Int @default(0) @map("current_participants")
+  recruitStartAt DateTime  @map("recruit_start_at") 
+  recruitEndAt DateTime   @map("recruit_end_at")
+  challengeStartAt DateTime @map("challenge_start_at")
+  challengeEndAt DateTime @map("challenge_end_at")
+  status String @default("RECRUITING")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  course Course @relation(fields: [courseId], references: [id],onDelete: Cascade)
+  participants        ChallengeParticipant[]
+
+   @@map("challenges")
+}
+
+model ChallengeParticipant {
+  id String @id @default(uuid())
+  challengeId String @map("challenge_id")
+  userId String @map("user_id")
+
+  joinedAt DateTime @default(now()) @map("joined_at ")
+  status String @default("ACTIVE")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+  @@map("challenge_participants")
 }

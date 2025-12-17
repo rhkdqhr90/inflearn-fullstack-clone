@@ -9,13 +9,97 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pencil, X } from "lucide-react";
+import { Pencil, X, Trophy, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Course } from "@/generated/openapi-client";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function UI({ courses }: { courses: Course[] }) {
   const router = useRouter();
+
+  // 챌린지 관리 버튼 렌더링 로직
+  const renderChallengeButton = (course: any) => {
+    const challenge = course.challenge;
+
+    // 챌린지가 없는 경우 - 생성 가능
+    if (!challenge) {
+      return (
+        <Button
+          onClick={() => router.push(`/course/${course.id}/challenge`)}
+          variant="secondary"
+          size="sm"
+        >
+          <Trophy className="w-4 h-4 mr-1" /> 챌린지 생성
+        </Button>
+      );
+    }
+
+    // 챌린지 상태별 처리
+    const status = challenge.status;
+    const isRecruiting = status === "RECRUITING";
+    const isOngoing = status === "ONGOING";
+    const isCompleted = status === "COMPLETED";
+
+    // 진행중이거나 종료된 챌린지 - 수정/삭제 불가
+    if (isOngoing || isCompleted) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled
+                  className="w-full"
+                >
+                  <AlertCircle className="w-4 h-4 mr-1" />
+                  {isOngoing ? "진행중" : "종료됨"}
+                </Button>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {isOngoing
+                  ? "진행 중인 챌린지는 수정/삭제할 수 없습니다"
+                  : "종료된 챌린지는 수정/삭제할 수 없습니다"}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+
+    // 모집중인 챌린지 - 수정/삭제 가능
+    if (isRecruiting) {
+      return (
+        <Button
+          onClick={() => router.push(`/course/${course.id}/challenge`)}
+          variant="secondary"
+          size="sm"
+        >
+          <Trophy className="w-4 h-4 mr-1" /> 챌린지 수정
+        </Button>
+      );
+    }
+
+    // 기타 상태 - 기본 관리 버튼
+    return (
+      <Button
+        onClick={() => router.push(`/course/${course.id}/challenge`)}
+        variant="secondary"
+        size="sm"
+      >
+        <Trophy className="w-4 h-4 mr-1" /> 챌린지 관리
+      </Button>
+    );
+  };
 
   return (
     <div className="w-full p-6">
@@ -102,6 +186,7 @@ export default function UI({ courses }: { courses: Course[] }) {
                     >
                       <Pencil className="w-4 h-4 mr-1" /> 강의 수정
                     </Button>
+                    {renderChallengeButton(course)}
                   </TableCell>
                 </TableRow>
               );

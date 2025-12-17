@@ -57,6 +57,15 @@ import {
   VerifyPaymentDto,
   paymentsControllerVerifyPayment,
   coursesControllerFindAllInstructorCourses,
+  challengesControllerFindAll,
+  challengesControllerFindOneBySlug,
+  challengesControllerGetParticipants,
+  challengesControllerJoin,
+  CreateChallengeDto,
+  challengesControllerCreate,
+  challengesControllerRemove,
+  challengesControllerUpdate,
+  UpdateChallengeDto,
 } from "@/generated/openapi-client";
 
 export const getAllCategories = async () => {
@@ -505,6 +514,79 @@ export const verifyPayment = async (verifyPaymentDto: VerifyPaymentDto) => {
   console.log(verifyPaymentDto);
   const { data, error } = await paymentsControllerVerifyPayment({
     body: verifyPaymentDto,
+  });
+
+  return { data, error };
+};
+
+export const getAllChallenge = async (status?: string) => {
+  const { data, error } = await challengesControllerFindAll({
+    query: {
+      ...(status && { status }),
+    } as any,
+  });
+  return { data, error };
+};
+
+export const getChallengeBySlug = async (slug: string) => {
+  const { data, error } = await challengesControllerFindOneBySlug({
+    path: {
+      slug,
+    },
+  });
+
+  return { data, error };
+};
+
+export const joinChallenge = async (slug: string) => {
+  const { data, error } = await challengesControllerJoin({
+    path: {
+      slug,
+    },
+  });
+  return { data, error };
+};
+export const getChallengeParticipants = async (slug: string) => {
+  const { data, error } = await challengesControllerGetParticipants({
+    path: {
+      slug,
+    },
+  });
+  return { data, error };
+};
+
+export const createCourseChallenge = async (
+  courseId: string,
+  createChallengeDto: CreateChallengeDto
+) => {
+  const { data, error } = await challengesControllerCreate({
+    path: {
+      courseId,
+    },
+    body: createChallengeDto,
+  });
+  return { data, error };
+};
+
+export const updateCourseChallenge = async (
+  courseId: string,
+  updateChallengeDto: UpdateChallengeDto
+) => {
+  const { data, error } = await challengesControllerUpdate({
+    path: {
+      courseId,
+    },
+    body: updateChallengeDto,
+  });
+
+  return { data, error };
+};
+
+export const deleteCourseChallenge = async (courseId: string) => {
+  const { data, error } = await challengesControllerRemove({
+    path: {
+      courseId,
+    },
   });
 
   return { data, error };

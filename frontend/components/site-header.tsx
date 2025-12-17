@@ -4,19 +4,7 @@ import { CourseCategory, User } from "@/generated/openapi-client";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import {
-  Play,
-  Flag,
-  MessageCircle,
-  Paperclip,
-  Users,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  ShoppingCart,
-  Layers,
-} from "lucide-react";
+import { Search, ShoppingCart, Layers, ChevronLeft } from "lucide-react";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -50,6 +38,9 @@ export default function SiteHeader({
   const [search, setSearch] = useState("");
 
   const router = useRouter();
+
+  // 챌린지 상세 페이지 여부 확인
+  const isChallengeDetailPage = pathname.match(/^\/challenges\/[^\/]+$/);
 
   const cartItemsQuery = useQuery({
     queryFn: () => api.getCartItems(),
@@ -87,54 +78,89 @@ export default function SiteHeader({
   return (
     <header className="w-full bg-white  border-gray-200">
       {/* 첫째 줄: 로고, 네비게이션, 지식공유, 아바타 */}
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="container px-4 py-3 flex items-center justify-between">
         {/* 로고 */}
         <Link href="/" className="flex items-center gap-2">
           <Image
             src="/images/inflearn_public_logo.svg"
             alt="inflearn logo"
-            width={120}
-            height={40}
+            width={117}
+            height={48}
             className="h-10 w-auto"
             unoptimized
           />
         </Link>
 
         {/* 네비게이션 메뉴 */}
-        <nav className="flex items-center gap-6">
+        <nav className="flex items-center gap-3">
           <Link
             href="/"
             className="flex items-center gap-1.5 text-gray-700 hover:text-green-600 transition-colors"
           >
-            <Play className="w-4 h-4" />
+            <Image
+              src="/icons/course.png"
+              alt="강의"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+              priority
+            />
             <span className="font-bold">강의</span>
           </Link>
           <Link
-            href="/challenge"
+            href="/challenges"
             className="flex items-center gap-1.5 text-gray-700 hover:text-green-600 transition-colors"
           >
-            <Flag className="w-4 h-4" />
+            <Image
+              src="/icons/challenge.avif"
+              alt="강의"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+              priority
+            />
             <span className="font-bold">챌린지</span>
           </Link>
           <Link
             href="/mentoring"
             className="flex items-center gap-1.5 text-gray-700 hover:text-green-600 transition-colors"
           >
-            <MessageCircle className="w-4 h-4" />
+            <Image
+              src="/icons/mentoring.png"
+              alt="강의"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+              priority
+            />
             <span className="font-bold">멘토링</span>
           </Link>
           <Link
             href="/clip"
             className="flex items-center gap-1.5 text-gray-700 hover:text-green-600 transition-colors"
           >
-            <Paperclip className="w-4 h-4" />
+            <Image
+              src="/icons/clip.avif"
+              alt="강의"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+              priority
+            />
             <span className="font-bold">클립</span>
           </Link>
           <Link
             href="/community"
             className="flex items-center gap-1.5 text-gray-700 hover:text-green-600 transition-colors"
           >
-            <Users className="w-4 h-4" />
+            <Image
+              src="/icons/community.png"
+              alt="강의"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+              priority
+            />
             <span className="font-bold">커뮤니티</span>
           </Link>
         </nav>
@@ -310,16 +336,23 @@ export default function SiteHeader({
           )}
         </div>
       </div>
-      {/* 둘째 줄: 검색 바 */}
-      {!isInstructorPage && (
-        <div className="container mx-auto px-4 py-3 border-t border-gray-100">
+      {/* 둘째 줄: 검색 바 - 챌린지 상세에서는 숨김 */}
+      {!isInstructorPage && !isChallengeDetailPage && (
+        <div className="container mx-auto px-4 py-3  border-gray-100">
           <div className="flex items-center justify-center">
             <div
               className="flex items-center gap-2 bg-white border border-gray-300 rounded-4xl px-4 py-2.5"
               style={{ width: "fit-content", minWidth: "400px" }}
             >
               <div className="flex items-center gap-1 text-gray-500">
-                <Play className="w-4 h-4" />
+                <Image
+                  src="/icons/course.png"
+                  alt="강의"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8"
+                  priority
+                />
                 <ChevronLeft className="w-3 h-3" />
               </div>
               <input
@@ -369,7 +402,8 @@ export default function SiteHeader({
           </nav>
         )}
       </div>
-      {!isInstructorPage && <HomeBannerSlider />}
+      {/* 배너 슬라이더 - 챌린지 상세에서는 숨김 */}
+      {!isInstructorPage && !isChallengeDetailPage && <HomeBannerSlider />}
     </header>
   );
 }

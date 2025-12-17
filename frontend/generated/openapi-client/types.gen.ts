@@ -214,6 +214,35 @@ export type OrderItem = {
     course: Course;
 };
 
+export type ChallengeParticipant = {
+    id: string;
+    challengeId: string;
+    userId: string;
+    joinedAt: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    challenge: Challenge;
+    user: User;
+};
+
+export type Challenge = {
+    id: string;
+    courseId: string;
+    maxParticipants: number;
+    description?: string;
+    currentParticipants: number;
+    recruitStartAt: string;
+    recruitEndAt: string;
+    challengeStartAt: string;
+    challengeEndAt: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    course: Course;
+    participants: Array<ChallengeParticipant>;
+};
+
 export type Course = {
     id: string;
     slug: string;
@@ -239,6 +268,7 @@ export type Course = {
     lectureActivities: Array<LectureActivity>;
     cartItems: Array<CartItem>;
     orderItems: Array<OrderItem>;
+    challenge?: Challenge;
 };
 
 export type User = {
@@ -260,6 +290,7 @@ export type User = {
     courseFavorites: Array<CourseFavorite>;
     cartItems: Array<CartItem>;
     orders: Array<Order>;
+    challengeParticipations: Array<ChallengeParticipant>;
 };
 
 export type CourseDetailDto = {
@@ -287,6 +318,7 @@ export type CourseDetailDto = {
     lectureActivities: Array<LectureActivity>;
     cartItems: Array<CartItem>;
     orderItems: Array<OrderItem>;
+    challenge?: Challenge;
     /**
      * 수강등록 여부
      */
@@ -602,17 +634,6 @@ export type CreateCommentDto = {
     content: string;
 };
 
-export type CourseCommnet = {
-    id: string;
-    content: string;
-    userId: string;
-    questionId: string;
-    createdAt: string;
-    updatedAt: string;
-    question: CourseQuestion;
-    user: User;
-};
-
 export type UpdateCommentDto = {
     /**
      * 댓글 내용
@@ -687,6 +708,113 @@ export type CartResponseDto = {
 
 export type VerifyPaymentDto = {
     [key: string]: unknown;
+};
+
+export type CreateChallengeDto = {
+    /**
+     * 최대 모집 입원
+     */
+    maxParticipants: number;
+    /**
+     * 모집 시작일
+     */
+    recruitStartAt: string;
+    /**
+     * 모집 종료일
+     */
+    recruitEndAt: string;
+    /**
+     * 챌린지 시작일
+     */
+    challengeStartAt: string;
+    /**
+     * 챌린지 종료일
+     */
+    challengeEndAt: string;
+};
+
+export type ChallengeResponseDto = {
+    /**
+     * 챌린지 ID
+     */
+    id: string;
+    /**
+     * 코스  ID
+     */
+    courseId: string;
+    /**
+     * 최대 모집 인원
+     */
+    maxParticipants: number;
+    /**
+     * 현재 참가자 수
+     */
+    currentParticipants: number;
+    /**
+     * 모집 시작일
+     */
+    recruitStartAt: string;
+    /**
+     * 모집 마감일
+     */
+    recruitEndAt: string;
+    /**
+     * 챌린지 시작일
+     */
+    challengeStartAt: string;
+    /**
+     * 챌린지 종료일
+     */
+    challengeEndAt: string;
+    /**
+     * 챌린지 상태
+     */
+    status: 'RECRUITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+    /**
+     * 생성일
+     */
+    createdAt: string;
+    /**
+     * 수정일
+     */
+    updatedAt: string;
+    /**
+     * 강의 정보
+     */
+    course?: {
+        [key: string]: unknown;
+    };
+    /**
+     * 참가자 목록
+     */
+    participants?: Array<string>;
+};
+
+export type UpdateChallengeDto = {
+    /**
+     * 최대 모집 입원
+     */
+    maxParticipants?: number;
+    /**
+     * 모집 시작일
+     */
+    recruitStartAt?: string;
+    /**
+     * 모집 종료일
+     */
+    recruitEndAt?: string;
+    /**
+     * 챌린지 시작일
+     */
+    challengeStartAt?: string;
+    /**
+     * 챌린지 종료일
+     */
+    challengeEndAt?: string;
+    /**
+     * 챌린지 상태
+     */
+    status?: 'RECRUITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 };
 
 export type AppControllerGetHelloData = {
@@ -1323,7 +1451,7 @@ export type CommentsControllerCreateResponses = {
     /**
      * 질문에 댓글 작성
      */
-    200: CourseCommnet;
+    200: CourseComment;
 };
 
 export type CommentsControllerCreateResponse = CommentsControllerCreateResponses[keyof CommentsControllerCreateResponses];
@@ -1359,7 +1487,7 @@ export type CommentsControllerUpdateResponses = {
     /**
      * 댓글 수정
      */
-    200: CourseCommnet;
+    200: CourseComment;
 };
 
 export type CommentsControllerUpdateResponse = CommentsControllerUpdateResponses[keyof CommentsControllerUpdateResponses];
@@ -1556,4 +1684,137 @@ export type PaymentsControllerHandleWebookData = {
 
 export type PaymentsControllerHandleWebookResponses = {
     201: unknown;
+};
+
+export type BatchControllerRunPaymentStatsData = {
+    body?: never;
+    path?: never;
+    query: {
+        date: string;
+    };
+    url: '/admin/batch/payment-stats';
+};
+
+export type BatchControllerRunPaymentStatsResponses = {
+    201: unknown;
+};
+
+export type ChallengesControllerRemoveData = {
+    body?: never;
+    path: {
+        courseId: string;
+    };
+    query?: never;
+    url: '/courses/{courseId}/challenge';
+};
+
+export type ChallengesControllerRemoveResponses = {
+    /**
+     * 챌린지가 삭제되었습니다.
+     */
+    200: unknown;
+};
+
+export type ChallengesControllerUpdateData = {
+    body: UpdateChallengeDto;
+    path: {
+        courseId: string;
+    };
+    query?: never;
+    url: '/courses/{courseId}/challenge';
+};
+
+export type ChallengesControllerUpdateResponses = {
+    /**
+     * 챌린지가 수정되었습니다.
+     */
+    200: ChallengeResponseDto;
+};
+
+export type ChallengesControllerUpdateResponse = ChallengesControllerUpdateResponses[keyof ChallengesControllerUpdateResponses];
+
+export type ChallengesControllerCreateData = {
+    body: CreateChallengeDto;
+    path: {
+        courseId: string;
+    };
+    query?: never;
+    url: '/courses/{courseId}/challenge';
+};
+
+export type ChallengesControllerCreateResponses = {
+    /**
+     * 챌린지 생성
+     */
+    200: ChallengeResponseDto;
+};
+
+export type ChallengesControllerCreateResponse = ChallengesControllerCreateResponses[keyof ChallengesControllerCreateResponses];
+
+export type ChallengesControllerFindAllData = {
+    body?: never;
+    path?: never;
+    query: {
+        status: string;
+    };
+    url: '/challenges';
+};
+
+export type ChallengesControllerFindAllResponses = {
+    /**
+     * 챌린지 목록
+     */
+    200: Array<ChallengeResponseDto>;
+};
+
+export type ChallengesControllerFindAllResponse = ChallengesControllerFindAllResponses[keyof ChallengesControllerFindAllResponses];
+
+export type ChallengesControllerFindOneBySlugData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: never;
+    url: '/challenges/{slug}';
+};
+
+export type ChallengesControllerFindOneBySlugResponses = {
+    /**
+     * 챌린지 상세 정보
+     */
+    200: ChallengeResponseDto;
+};
+
+export type ChallengesControllerFindOneBySlugResponse = ChallengesControllerFindOneBySlugResponses[keyof ChallengesControllerFindOneBySlugResponses];
+
+export type ChallengesControllerJoinData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: never;
+    url: '/challenges/{slug}/join';
+};
+
+export type ChallengesControllerJoinResponses = {
+    /**
+     * 챌린지 신청 결과 (redirect 정보 포함)
+     */
+    200: unknown;
+};
+
+export type ChallengesControllerGetParticipantsData = {
+    body?: never;
+    path: {
+        slug: string;
+    };
+    query?: never;
+    url: '/challenges/{slug}/participants';
+};
+
+export type ChallengesControllerGetParticipantsResponses = {
+    /**
+     * 참가자 목록
+     */
+    200: unknown;
 };

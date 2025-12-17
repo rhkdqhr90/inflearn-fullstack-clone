@@ -54,6 +54,22 @@ export class CoursesService {
       cursor,
       where,
       orderBy,
+      include: {
+        challenge: {
+          select: {
+            id: true,
+            status: true,
+            maxParticipants: true,
+            currentParticipants: true,
+            recruitStartAt: true,
+            recruitEndAt: true,
+            challengeStartAt: true,
+            challengeEndAt: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
     });
   }
 
@@ -77,6 +93,7 @@ export class CoursesService {
     const course = await this.prisma.course.findUnique({
       where: { id },
       include: {
+        challenge: true,
         instructor: true,
         categories: true,
         reviews: {

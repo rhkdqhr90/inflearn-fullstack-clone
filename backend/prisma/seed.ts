@@ -15,8 +15,46 @@ async function main() {
     );
     process.exit(1);
   }
+
+  const instructorNicknames = [
+    '개발바닥',
+    '로펀',
+    '코드마스터',
+    '테크닉스',
+    '프로그래머김',
+    '개발킹',
+    '코딩장인',
+    '데브온',
+    '알고리즘박사',
+    '풀스택준',
+    '리액트킴',
+    '노드마스터',
+    '자바왕',
+    '파이썬박',
+    '웹개발이',
+    '앱개발최',
+    '클라우드박',
+    '데이터정',
+    'AI전문가',
+    '보안왕',
+    '시니어개발',
+    '주니어탈출',
+    '백엔드박',
+    '프론트최',
+    '인프라왕',
+  ];
+
+  // 랜덤 닉네임 선택
+  const randomNickname =
+    instructorNicknames[Math.floor(Math.random() * instructorNicknames.length)];
+
+  await prisma.user.update({
+    where: { id: existingUser.id },
+    data: { name: randomNickname },
+  });
+
   const userId = existingUser.id;
-  console.log('기존 유저를 사용합니다:', userId);
+  console.log(`기존 유저를 사용합니다: ${userId}, 닉네임: ${randomNickname}`);
 
   // 2. 카테고리 시드 (기존 유지)
   await prisma.courseCategory.deleteMany({});

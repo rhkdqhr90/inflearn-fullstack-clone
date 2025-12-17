@@ -4,6 +4,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* globals.css */
+html {
+  font-size: 16px;
+}
+
+@layer base {
+  body {
+    @apply text-base leading-[1.6];
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

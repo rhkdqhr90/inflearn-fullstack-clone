@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { AppControllerGetHelloData, AppControllerGetHelloResponses, AppControllerTestUserData, AppControllerTestUserResponses, CartsControllerAddToCartData, CartsControllerAddToCartResponses, CartsControllerClearCartData, CartsControllerClearCartResponses, CartsControllerGetCartItemsData, CartsControllerGetCartItemsResponses, CartsControllerRemoveFromCartData, CartsControllerRemoveFromCartResponses, CategoriesControllerFindAllData, CategoriesControllerFindAllResponses, CommentsControllerCreateData, CommentsControllerCreateResponses, CommentsControllerRemoveData, CommentsControllerRemoveResponses, CommentsControllerUpdateData, CommentsControllerUpdateResponses, CoursesControllerAddFavoriteData, CoursesControllerAddFavoriteResponses, CoursesControllerCreateCourseReviewData, CoursesControllerCreateCourseReviewResponses, CoursesControllerCreateData, CoursesControllerCreateInstructorReplyData, CoursesControllerCreateInstructorReplyResponses, CoursesControllerCreateResponses, CoursesControllerDeleteCourseReviewData, CoursesControllerDeleteCourseReviewResponses, CoursesControllerDleleteData, CoursesControllerDleleteResponses, CoursesControllerEnrollCourseData, CoursesControllerEnrollCourseResponses, CoursesControllerFindAllInstructorCoursesData, CoursesControllerFindAllInstructorCoursesResponses, CoursesControllerFindAllMyCoursesData, CoursesControllerFindAllMyCoursesResponses, CoursesControllerFindOneData, CoursesControllerFindOneResponses, CoursesControllerGetCourseReviewsData, CoursesControllerGetCourseReviewsResponses, CoursesControllerGetFavoriteData, CoursesControllerGetFavoriteResponses, CoursesControllerGetInstructorReviewsData, CoursesControllerGetInstructorReviewsResponses, CoursesControllerGetLectureActivityData, CoursesControllerGetLectureActivityResponses, CoursesControllerGetMyFavoritesData, CoursesControllerGetMyFavoritesResponses, CoursesControllerRemoveFavoriteData, CoursesControllerRemoveFavoriteResponses, CoursesControllerSearchData, CoursesControllerSearchResponses, CoursesControllerUpdateCourseReviewData, CoursesControllerUpdateCourseReviewResponses, CoursesControllerUpdateData, CoursesControllerUpdateResponses, LecturesControllerCreateData, LecturesControllerCreateResponses, LecturesControllerDeletData, LecturesControllerDeletResponses, LecturesControllerFindOneData, LecturesControllerFindOneResponses, LecturesControllerGetLectureActivityData, LecturesControllerGetLectureActivityResponses, LecturesControllerUpdateData, LecturesControllerUpdateLectureActivityData, LecturesControllerUpdateLectureActivityResponses, LecturesControllerUpdateResponses, MediaControllerUploadMediaData, MediaControllerUploadMediaResponses, PaymentsControllerHandleWebookData, PaymentsControllerHandleWebookResponses, PaymentsControllerVerifyPaymentData, PaymentsControllerVerifyPaymentResponses, QuestionsControllerCreateData, QuestionsControllerCreateResponses, QuestionsControllerFindAllByInstructorIdData, QuestionsControllerFindAllByInstructorIdResponses, QuestionsControllerFindAllData, QuestionsControllerFindAllResponses, QuestionsControllerFindOneData, QuestionsControllerFindOneResponses, QuestionsControllerRemoveData, QuestionsControllerRemoveResponses, QuestionsControllerUpdateData, QuestionsControllerUpdateResponses, SectionsControllerCreateData, SectionsControllerCreateResponses, SectionsControllerDeleteData, SectionsControllerDeleteResponses, SectionsControllerFindOneData, SectionsControllerFindOneResponses, SectionsControllerUpdateData, SectionsControllerUpdateResponses, UsersControllerGetProfileData, UsersControllerGetProfileResponses, UsersControllerUpdateProfileData, UsersControllerUpdateProfileResponses } from './types.gen';
+import type { AppControllerGetHelloData, AppControllerGetHelloResponses, AppControllerTestUserData, AppControllerTestUserResponses, BatchControllerRunPaymentStatsData, BatchControllerRunPaymentStatsResponses, CartsControllerAddToCartData, CartsControllerAddToCartResponses, CartsControllerClearCartData, CartsControllerClearCartResponses, CartsControllerGetCartItemsData, CartsControllerGetCartItemsResponses, CartsControllerRemoveFromCartData, CartsControllerRemoveFromCartResponses, CategoriesControllerFindAllData, CategoriesControllerFindAllResponses, ChallengesControllerCreateData, ChallengesControllerCreateResponses, ChallengesControllerFindAllData, ChallengesControllerFindAllResponses, ChallengesControllerFindOneBySlugData, ChallengesControllerFindOneBySlugResponses, ChallengesControllerGetParticipantsData, ChallengesControllerGetParticipantsResponses, ChallengesControllerJoinData, ChallengesControllerJoinResponses, ChallengesControllerRemoveData, ChallengesControllerRemoveResponses, ChallengesControllerUpdateData, ChallengesControllerUpdateResponses, CommentsControllerCreateData, CommentsControllerCreateResponses, CommentsControllerRemoveData, CommentsControllerRemoveResponses, CommentsControllerUpdateData, CommentsControllerUpdateResponses, CoursesControllerAddFavoriteData, CoursesControllerAddFavoriteResponses, CoursesControllerCreateCourseReviewData, CoursesControllerCreateCourseReviewResponses, CoursesControllerCreateData, CoursesControllerCreateInstructorReplyData, CoursesControllerCreateInstructorReplyResponses, CoursesControllerCreateResponses, CoursesControllerDeleteCourseReviewData, CoursesControllerDeleteCourseReviewResponses, CoursesControllerDleleteData, CoursesControllerDleleteResponses, CoursesControllerEnrollCourseData, CoursesControllerEnrollCourseResponses, CoursesControllerFindAllInstructorCoursesData, CoursesControllerFindAllInstructorCoursesResponses, CoursesControllerFindAllMyCoursesData, CoursesControllerFindAllMyCoursesResponses, CoursesControllerFindOneData, CoursesControllerFindOneResponses, CoursesControllerGetCourseReviewsData, CoursesControllerGetCourseReviewsResponses, CoursesControllerGetFavoriteData, CoursesControllerGetFavoriteResponses, CoursesControllerGetInstructorReviewsData, CoursesControllerGetInstructorReviewsResponses, CoursesControllerGetLectureActivityData, CoursesControllerGetLectureActivityResponses, CoursesControllerGetMyFavoritesData, CoursesControllerGetMyFavoritesResponses, CoursesControllerRemoveFavoriteData, CoursesControllerRemoveFavoriteResponses, CoursesControllerSearchData, CoursesControllerSearchResponses, CoursesControllerUpdateCourseReviewData, CoursesControllerUpdateCourseReviewResponses, CoursesControllerUpdateData, CoursesControllerUpdateResponses, LecturesControllerCreateData, LecturesControllerCreateResponses, LecturesControllerDeletData, LecturesControllerDeletResponses, LecturesControllerFindOneData, LecturesControllerFindOneResponses, LecturesControllerGetLectureActivityData, LecturesControllerGetLectureActivityResponses, LecturesControllerUpdateData, LecturesControllerUpdateLectureActivityData, LecturesControllerUpdateLectureActivityResponses, LecturesControllerUpdateResponses, MediaControllerUploadMediaData, MediaControllerUploadMediaResponses, PaymentsControllerHandleWebookData, PaymentsControllerHandleWebookResponses, PaymentsControllerVerifyPaymentData, PaymentsControllerVerifyPaymentResponses, QuestionsControllerCreateData, QuestionsControllerCreateResponses, QuestionsControllerFindAllByInstructorIdData, QuestionsControllerFindAllByInstructorIdResponses, QuestionsControllerFindAllData, QuestionsControllerFindAllResponses, QuestionsControllerFindOneData, QuestionsControllerFindOneResponses, QuestionsControllerRemoveData, QuestionsControllerRemoveResponses, QuestionsControllerUpdateData, QuestionsControllerUpdateResponses, SectionsControllerCreateData, SectionsControllerCreateResponses, SectionsControllerDeleteData, SectionsControllerDeleteResponses, SectionsControllerFindOneData, SectionsControllerFindOneResponses, SectionsControllerUpdateData, SectionsControllerUpdateResponses, UsersControllerGetProfileData, UsersControllerGetProfileResponses, UsersControllerUpdateProfileData, UsersControllerUpdateProfileResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -407,3 +407,63 @@ export const paymentsControllerHandleWebook = <ThrowOnError extends boolean = fa
         ...options.headers
     }
 });
+
+export const batchControllerRunPaymentStats = <ThrowOnError extends boolean = false>(options: Options<BatchControllerRunPaymentStatsData, ThrowOnError>) => (options.client ?? client).post<BatchControllerRunPaymentStatsResponses, unknown, ThrowOnError>({ url: '/admin/batch/payment-stats', ...options });
+
+/**
+ * 챌린지 삭제
+ */
+export const challengesControllerRemove = <ThrowOnError extends boolean = false>(options: Options<ChallengesControllerRemoveData, ThrowOnError>) => (options.client ?? client).delete<ChallengesControllerRemoveResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/courses/{courseId}/challenge',
+    ...options
+});
+
+/**
+ * 챌린지 수정
+ */
+export const challengesControllerUpdate = <ThrowOnError extends boolean = false>(options: Options<ChallengesControllerUpdateData, ThrowOnError>) => (options.client ?? client).patch<ChallengesControllerUpdateResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/courses/{courseId}/challenge',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const challengesControllerCreate = <ThrowOnError extends boolean = false>(options: Options<ChallengesControllerCreateData, ThrowOnError>) => (options.client ?? client).post<ChallengesControllerCreateResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/courses/{courseId}/challenge',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 챌린지 목록 조회 (전체)
+ */
+export const challengesControllerFindAll = <ThrowOnError extends boolean = false>(options: Options<ChallengesControllerFindAllData, ThrowOnError>) => (options.client ?? client).get<ChallengesControllerFindAllResponses, unknown, ThrowOnError>({ url: '/challenges', ...options });
+
+/**
+ * 챌린지 상세 조회 (슬러그)
+ */
+export const challengesControllerFindOneBySlug = <ThrowOnError extends boolean = false>(options: Options<ChallengesControllerFindOneBySlugData, ThrowOnError>) => (options.client ?? client).get<ChallengesControllerFindOneBySlugResponses, unknown, ThrowOnError>({ url: '/challenges/{slug}', ...options });
+
+/**
+ * 챌린지 신청
+ *
+ * 이미 수강 중이면 챌린지만 참가, 아니면 장바구니에 추가 또는 자동 수강 신청
+ */
+export const challengesControllerJoin = <ThrowOnError extends boolean = false>(options: Options<ChallengesControllerJoinData, ThrowOnError>) => (options.client ?? client).post<ChallengesControllerJoinResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/challenges/{slug}/join',
+    ...options
+});
+
+/**
+ * 챌린지 참가자 목록
+ */
+export const challengesControllerGetParticipants = <ThrowOnError extends boolean = false>(options: Options<ChallengesControllerGetParticipantsData, ThrowOnError>) => (options.client ?? client).get<ChallengesControllerGetParticipantsResponses, unknown, ThrowOnError>({ url: '/challenges/{slug}/participants', ...options });
