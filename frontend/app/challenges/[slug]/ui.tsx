@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -24,6 +24,26 @@ export default function ChallengeDetailUI({
 }: ChallengeDetailUIProps) {
   const router = useRouter();
   const [isJoining, setIsJoining] = useState(false);
+
+  const [activeTab, setActiveTab] = useState<"intro" | "curriculum" | "review">(
+    "intro"
+  );
+  const introRef = useRef<HTMLDivElement>(null);
+  const curriculumRef = useRef<HTMLDivElement>(null);
+  const reviewRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSection = (section: "intro" | "curriculum" | "review") => {
+    setActiveTab(section);
+    const refs = {
+      intro: introRef,
+      curriculum: curriculumRef,
+      review: reviewRef,
+    };
+    refs[section].current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
 
   if (!challenge.course) {
     return (
@@ -177,7 +197,7 @@ export default function ChallengeDetailUI({
 
       {/* 메인 */}
       <div
-     
+        className="border-b border-gray-200 mb-10"
         style={{
           width: "100vw",
           position: "relative",
@@ -191,25 +211,182 @@ export default function ChallengeDetailUI({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
             {/* 왼쪽: 설명 */}
             <div className="lg:col-span-2 space-y-6 pt-8">
-              {(challenge as any).description && (
-                <div className="bg-white rounded-lg p-6 shadow-sm">
-                  <h2 className="text-xl font-bold mb-4">강의 소개</h2>
-                  <div
-                    className="prose max-w-none"
-                    dangerouslySetInnerHTML={{
-                      __html: (challenge as any).description,
-                    }}
-                  />
-                </div>
-              )}
+              {/* 강의 소개 탭 */}
+              <div className="border-b border-gray-200 mb-10">
+                <nav className="flex gap-8 -mb-px">
+                  <button
+                    onClick={() => scrollToSection("intro")}
+                    className={`pb-4 border-b-2 cursor-pointer hover:border-gray-400 ${
+                      activeTab === "intro"
+                        ? "border-gray-900 font-bold text-gray-900"
+                        : "border-transparent font-medium text-gray-500 hover:text-gray-700"
+                    } text-base transition-colors`}
+                  >
+                    강의 소개
+                  </button>
+                  <button
+                    onClick={() => scrollToSection("curriculum")}
+                    className={`pb-4 border-b-2 cursor-pointer hover:border-gray-400 ${
+                      activeTab === "curriculum"
+                        ? "border-gray-900 font-bold text-gray-900"
+                        : "border-transparent font-medium text-gray-500 hover:text-gray-700"
+                    } text-base transition-colors`}
+                  >
+                    커리큘럼
+                  </button>
+                  <button
+                    onClick={() => scrollToSection("review")}
+                    className={`pb-4 border-b-2 cursor-pointer hover:border-gray-400${
+                      activeTab === "review"
+                        ? "border-gray-900 font-bold text-gray-900"
+                        : "border-transparent font-medium text-gray-500 hover:text-gray-700"
+                    } text-base transition-colors`}
+                  >
+                    수강평
+                  </button>
+                </nav>
+              </div>
+
+              {/* 챌린지 설명 */}
+              <div ref={introRef}>
+                {(challenge as any).description && (
+                  <div className="bg-white rounded-lg p-6">
+                    <h2 className="text-2xl font-bold mb-4">챌린지 소개</h2>
+                    <div
+                      className="prose max-w-none"
+                      dangerouslySetInnerHTML={{
+                        __html: (challenge as any).description,
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              {/* 강의 설명 */}
+
               {course.description && (
-                <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="bg-white rounded-lg p-6 ">
+                  <h2 className="text-2xl font-bold mb-4">강의 소개</h2>
                   <div
                     className="prose max-w-none"
                     dangerouslySetInnerHTML={{ __html: course.description }}
                   />
                 </div>
               )}
+              {/* 커리큘럼 섹션 */}
+              <div ref={curriculumRef}>
+                {course.sections && course.sections.length > 0 && (
+                  <div className="bg-white rounded-lg p-6 ">
+                    <h2 className="text-2xl font-bold mb-6">커리큘럼</h2>
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      {course.sections.map(
+                        (section: any, sectionIdx: number) => (
+                          <div
+                            key={section.id}
+                            className={sectionIdx > 0 ? "border-t" : ""}
+                          >
+                            <div className="bg-gray-50 px-5 py-4">
+                              <div className="flex items-center justify-between">
+                                <h3 className="font-semibold text-gray-900">
+                                  {section.title}
+                                </h3>
+                                <span className="text-sm text-gray-600">
+                                  {section.lectures?.length || 0}개 강의
+                                </span>
+                              </div>
+                            </div>
+                            {section.lectures &&
+                              section.lectures.length > 0 && (
+                                <div className="bg-white">
+                                  {section.lectures
+                                    .sort((a: any, b: any) => a.order - b.order)
+                                    .map((lecture: any, lectureIdx: number) => (
+                                      <div
+                                        key={lecture.id}
+                                        className={`flex items-center justify-between px-5 py-3 ${
+                                          lectureIdx <
+                                          section.lectures.length - 1
+                                            ? "border-b border-gray-100"
+                                            : ""
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          {lecture.isPreview ? (
+                                            <svg
+                                              className="w-4 h-4 text-green-600"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              viewBox="0 0 24 24"
+                                            >
+                                              <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                                              />
+                                              <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                              />
+                                            </svg>
+                                          ) : (
+                                            <svg
+                                              className="w-4 h-4 text-gray-400"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              viewBox="0 0 24 24"
+                                            >
+                                              <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                              />
+                                            </svg>
+                                          )}
+                                          <span className="text-sm">
+                                            {lecture.title}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                          {lecture.isPreview && (
+                                            <button className="text-xs px-3 py-1.5 border border-gray-300 text-gray-700 font-semibold rounded hover:border-gray-400 transition-colors">
+                                              미리보기
+                                            </button>
+                                          )}
+                                          <span className="text-sm text-gray-600">
+                                            {Math.floor(
+                                              (lecture.duration || 0) / 60
+                                            )}
+                                            :
+                                            {String(
+                                              Math.floor(
+                                                (lecture.duration || 0) % 60
+                                              )
+                                            ).padStart(2, "0")}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                </div>
+                              )}
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {/* 수강평 섹션 (추후 구현) */}
+              <div ref={reviewRef}>
+                <div className="bg-white rounded-lg p-6">
+                  <h2 className="text-2xl font-bold mb-4">수강평</h2>
+                  <p className="text-gray-500 text-center py-8">
+                    아직 등록된 수강평이 없습니다.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* 오른쪽: 신청 영역 */}

@@ -18,7 +18,7 @@ import { Session } from "next-auth";
 import { Button } from "./ui/button";
 import { useQuery } from "@tanstack/react-query";
 import * as api from "@/lib/api";
-import { HomeBannerSlider } from "./home-bannerside";
+import { HomeBannerSlider } from "./home-banner-side";
 
 export default function SiteHeader({
   session,

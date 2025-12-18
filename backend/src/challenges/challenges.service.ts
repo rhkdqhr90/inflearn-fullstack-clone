@@ -220,11 +220,9 @@ export class ChallengesService {
           include: {
             lectures: {
               orderBy: { order: 'asc' },
-              take: 1,
             },
           },
           orderBy: { order: 'asc' },
-          take: 1,
         },
       },
     });
