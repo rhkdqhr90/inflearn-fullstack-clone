@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { AppControllerGetHelloData, AppControllerGetHelloResponses, AppControllerTestUserData, AppControllerTestUserResponses, BatchControllerRunPaymentStatsData, BatchControllerRunPaymentStatsResponses, CartsControllerAddToCartData, CartsControllerAddToCartResponses, CartsControllerClearCartData, CartsControllerClearCartResponses, CartsControllerGetCartItemsData, CartsControllerGetCartItemsResponses, CartsControllerRemoveFromCartData, CartsControllerRemoveFromCartResponses, CategoriesControllerFindAllData, CategoriesControllerFindAllResponses, ChallengesControllerCreateData, ChallengesControllerCreateResponses, ChallengesControllerFindAllData, ChallengesControllerFindAllResponses, ChallengesControllerFindOneBySlugData, ChallengesControllerFindOneBySlugResponses, ChallengesControllerGetParticipantsData, ChallengesControllerGetParticipantsResponses, ChallengesControllerJoinData, ChallengesControllerJoinResponses, ChallengesControllerRemoveData, ChallengesControllerRemoveResponses, ChallengesControllerUpdateData, ChallengesControllerUpdateResponses, CommentsControllerCreateData, CommentsControllerCreateResponses, CommentsControllerRemoveData, CommentsControllerRemoveResponses, CommentsControllerUpdateData, CommentsControllerUpdateResponses, CoursesControllerAddFavoriteData, CoursesControllerAddFavoriteResponses, CoursesControllerCreateCourseReviewData, CoursesControllerCreateCourseReviewResponses, CoursesControllerCreateData, CoursesControllerCreateInstructorReplyData, CoursesControllerCreateInstructorReplyResponses, CoursesControllerCreateResponses, CoursesControllerDeleteCourseReviewData, CoursesControllerDeleteCourseReviewResponses, CoursesControllerDleleteData, CoursesControllerDleleteResponses, CoursesControllerEnrollCourseData, CoursesControllerEnrollCourseResponses, CoursesControllerFindAllInstructorCoursesData, CoursesControllerFindAllInstructorCoursesResponses, CoursesControllerFindAllMyCoursesData, CoursesControllerFindAllMyCoursesResponses, CoursesControllerFindOneData, CoursesControllerFindOneResponses, CoursesControllerGetCourseReviewsData, CoursesControllerGetCourseReviewsResponses, CoursesControllerGetFavoriteData, CoursesControllerGetFavoriteResponses, CoursesControllerGetInstructorReviewsData, CoursesControllerGetInstructorReviewsResponses, CoursesControllerGetLectureActivityData, CoursesControllerGetLectureActivityResponses, CoursesControllerGetMyFavoritesData, CoursesControllerGetMyFavoritesResponses, CoursesControllerRemoveFavoriteData, CoursesControllerRemoveFavoriteResponses, CoursesControllerSearchData, CoursesControllerSearchResponses, CoursesControllerUpdateCourseReviewData, CoursesControllerUpdateCourseReviewResponses, CoursesControllerUpdateData, CoursesControllerUpdateResponses, LecturesControllerCreateData, LecturesControllerCreateResponses, LecturesControllerDeletData, LecturesControllerDeletResponses, LecturesControllerFindOneData, LecturesControllerFindOneResponses, LecturesControllerGetLectureActivityData, LecturesControllerGetLectureActivityResponses, LecturesControllerUpdateData, LecturesControllerUpdateLectureActivityData, LecturesControllerUpdateLectureActivityResponses, LecturesControllerUpdateResponses, MediaControllerUploadMediaData, MediaControllerUploadMediaResponses, PaymentsControllerHandleWebookData, PaymentsControllerHandleWebookResponses, PaymentsControllerVerifyPaymentData, PaymentsControllerVerifyPaymentResponses, QuestionsControllerCreateData, QuestionsControllerCreateResponses, QuestionsControllerFindAllByInstructorIdData, QuestionsControllerFindAllByInstructorIdResponses, QuestionsControllerFindAllData, QuestionsControllerFindAllResponses, QuestionsControllerFindOneData, QuestionsControllerFindOneResponses, QuestionsControllerRemoveData, QuestionsControllerRemoveResponses, QuestionsControllerUpdateData, QuestionsControllerUpdateResponses, SectionsControllerCreateData, SectionsControllerCreateResponses, SectionsControllerDeleteData, SectionsControllerDeleteResponses, SectionsControllerFindOneData, SectionsControllerFindOneResponses, SectionsControllerUpdateData, SectionsControllerUpdateResponses, UsersControllerGetProfileData, UsersControllerGetProfileResponses, UsersControllerUpdateProfileData, UsersControllerUpdateProfileResponses } from './types.gen';
+import type { AppControllerGetHelloData, AppControllerGetHelloResponses, AppControllerTestUserData, AppControllerTestUserResponses, BatchControllerRunPaymentStatsData, BatchControllerRunPaymentStatsResponses, CartsControllerAddToCartData, CartsControllerAddToCartResponses, CartsControllerClearCartData, CartsControllerClearCartResponses, CartsControllerGetCartItemsData, CartsControllerGetCartItemsResponses, CartsControllerRemoveFromCartData, CartsControllerRemoveFromCartResponses, CategoriesControllerFindAllData, CategoriesControllerFindAllResponses, ChallengesControllerCreateData, ChallengesControllerCreateResponses, ChallengesControllerFindAllData, ChallengesControllerFindAllResponses, ChallengesControllerFindOneBySlugData, ChallengesControllerFindOneBySlugResponses, ChallengesControllerGetParticipantsData, ChallengesControllerGetParticipantsResponses, ChallengesControllerJoinData, ChallengesControllerJoinResponses, ChallengesControllerRemoveData, ChallengesControllerRemoveResponses, ChallengesControllerUpdateData, ChallengesControllerUpdateResponses, CommentsControllerCreateData, CommentsControllerCreateResponses, CommentsControllerRemoveData, CommentsControllerRemoveResponses, CommentsControllerUpdateData, CommentsControllerUpdateResponses, CoursesControllerAddFavoriteData, CoursesControllerAddFavoriteResponses, CoursesControllerCreateCourseReviewData, CoursesControllerCreateCourseReviewResponses, CoursesControllerCreateData, CoursesControllerCreateInstructorReplyData, CoursesControllerCreateInstructorReplyResponses, CoursesControllerCreateResponses, CoursesControllerDeleteCourseReviewData, CoursesControllerDeleteCourseReviewResponses, CoursesControllerDleleteData, CoursesControllerDleleteResponses, CoursesControllerEnrollCourseData, CoursesControllerEnrollCourseResponses, CoursesControllerFindAllInstructorCoursesData, CoursesControllerFindAllInstructorCoursesResponses, CoursesControllerFindAllMyCoursesData, CoursesControllerFindAllMyCoursesResponses, CoursesControllerFindOneData, CoursesControllerFindOneResponses, CoursesControllerGetCourseReviewsData, CoursesControllerGetCourseReviewsResponses, CoursesControllerGetFavoriteData, CoursesControllerGetFavoriteResponses, CoursesControllerGetInstructorReviewsData, CoursesControllerGetInstructorReviewsResponses, CoursesControllerGetLectureActivityData, CoursesControllerGetLectureActivityResponses, CoursesControllerGetMyFavoritesData, CoursesControllerGetMyFavoritesResponses, CoursesControllerRemoveFavoriteData, CoursesControllerRemoveFavoriteResponses, CoursesControllerSearchData, CoursesControllerSearchResponses, CoursesControllerUpdateCourseReviewData, CoursesControllerUpdateCourseReviewResponses, CoursesControllerUpdateData, CoursesControllerUpdateResponses, LecturesControllerCreateData, LecturesControllerCreateResponses, LecturesControllerDeletData, LecturesControllerDeletResponses, LecturesControllerFindOneData, LecturesControllerFindOneResponses, LecturesControllerGetLectureActivityData, LecturesControllerGetLectureActivityResponses, LecturesControllerUpdateData, LecturesControllerUpdateLectureActivityData, LecturesControllerUpdateLectureActivityResponses, LecturesControllerUpdateResponses, MediaControllerUploadMediaData, MediaControllerUploadMediaResponses, MentoringsControllerApplyForMentoringData, MentoringsControllerApplyForMentoringResponses, MentoringsControllerCreateData, MentoringsControllerCreateResponses, MentoringsControllerDeleteData, MentoringsControllerDeleteResponses, MentoringsControllerFindAllData, MentoringsControllerFindAllResponses, MentoringsControllerFindMyMentoringData, MentoringsControllerFindMyMentoringResponses, MentoringsControllerGetApplicationsData, MentoringsControllerGetApplicationsResponses, MentoringsControllerGetMyApplicationsData, MentoringsControllerGetMyApplicationsResponses, MentoringsControllerToggleActiveData, MentoringsControllerToggleActiveResponses, MentoringsControllerUpdateApplicationStatusData, MentoringsControllerUpdateApplicationStatusResponses, MentoringsControllerUpdateData, MentoringsControllerUpdateResponses, PaymentsControllerHandleWebookData, PaymentsControllerHandleWebookResponses, PaymentsControllerVerifyPaymentData, PaymentsControllerVerifyPaymentResponses, QuestionsControllerCreateData, QuestionsControllerCreateResponses, QuestionsControllerFindAllByInstructorIdData, QuestionsControllerFindAllByInstructorIdResponses, QuestionsControllerFindAllData, QuestionsControllerFindAllResponses, QuestionsControllerFindOneData, QuestionsControllerFindOneResponses, QuestionsControllerRemoveData, QuestionsControllerRemoveResponses, QuestionsControllerUpdateData, QuestionsControllerUpdateResponses, SectionsControllerCreateData, SectionsControllerCreateResponses, SectionsControllerDeleteData, SectionsControllerDeleteResponses, SectionsControllerFindOneData, SectionsControllerFindOneResponses, SectionsControllerUpdateData, SectionsControllerUpdateResponses, UsersControllerGetProfileData, UsersControllerGetProfileResponses, UsersControllerUpdateProfileData, UsersControllerUpdateProfileResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -467,3 +467,109 @@ export const challengesControllerJoin = <ThrowOnError extends boolean = false>(o
  * 챌린지 참가자 목록
  */
 export const challengesControllerGetParticipants = <ThrowOnError extends boolean = false>(options: Options<ChallengesControllerGetParticipantsData, ThrowOnError>) => (options.client ?? client).get<ChallengesControllerGetParticipantsResponses, unknown, ThrowOnError>({ url: '/challenges/{slug}/participants', ...options });
+
+/**
+ * 멘토링 목록 조회
+ */
+export const mentoringsControllerFindAll = <ThrowOnError extends boolean = false>(options?: Options<MentoringsControllerFindAllData, ThrowOnError>) => (options?.client ?? client).get<MentoringsControllerFindAllResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/mentorings',
+    ...options
+});
+
+/**
+ * 멘토링 생성
+ */
+export const mentoringsControllerCreate = <ThrowOnError extends boolean = false>(options: Options<MentoringsControllerCreateData, ThrowOnError>) => (options.client ?? client).post<MentoringsControllerCreateResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/mentorings',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 내 멘토링 조회
+ */
+export const mentoringsControllerFindMyMentoring = <ThrowOnError extends boolean = false>(options?: Options<MentoringsControllerFindMyMentoringData, ThrowOnError>) => (options?.client ?? client).get<MentoringsControllerFindMyMentoringResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/mentorings/my',
+    ...options
+});
+
+/**
+ * 멘토링 삭제
+ */
+export const mentoringsControllerDelete = <ThrowOnError extends boolean = false>(options: Options<MentoringsControllerDeleteData, ThrowOnError>) => (options.client ?? client).delete<MentoringsControllerDeleteResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/mentorings/{id}',
+    ...options
+});
+
+/**
+ * 멘토링 수정
+ */
+export const mentoringsControllerUpdate = <ThrowOnError extends boolean = false>(options: Options<MentoringsControllerUpdateData, ThrowOnError>) => (options.client ?? client).patch<MentoringsControllerUpdateResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/mentorings/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 멘토링 활성화
+ */
+export const mentoringsControllerToggleActive = <ThrowOnError extends boolean = false>(options: Options<MentoringsControllerToggleActiveData, ThrowOnError>) => (options.client ?? client).patch<MentoringsControllerToggleActiveResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/mentorings/{id}/toggle',
+    ...options
+});
+
+/**
+ * 멘토링 신청 관리
+ */
+export const mentoringsControllerApplyForMentoring = <ThrowOnError extends boolean = false>(options: Options<MentoringsControllerApplyForMentoringData, ThrowOnError>) => (options.client ?? client).post<MentoringsControllerApplyForMentoringResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/mentorings/{id}/apply',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 멘토링 신청 목록 조회
+ */
+export const mentoringsControllerGetApplications = <ThrowOnError extends boolean = false>(options: Options<MentoringsControllerGetApplicationsData, ThrowOnError>) => (options.client ?? client).get<MentoringsControllerGetApplicationsResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/mentorings/{id}/applications',
+    ...options
+});
+
+/**
+ * 내 멘토링 신청 목록 조회
+ */
+export const mentoringsControllerGetMyApplications = <ThrowOnError extends boolean = false>(options?: Options<MentoringsControllerGetMyApplicationsData, ThrowOnError>) => (options?.client ?? client).get<MentoringsControllerGetMyApplicationsResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/mentorings/applications/my',
+    ...options
+});
+
+/**
+ * 멘토링 신청서 업데이트
+ */
+export const mentoringsControllerUpdateApplicationStatus = <ThrowOnError extends boolean = false>(options: Options<MentoringsControllerUpdateApplicationStatusData, ThrowOnError>) => (options.client ?? client).patch<MentoringsControllerUpdateApplicationStatusResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/mentorings/applications/{applicationId}/status',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});

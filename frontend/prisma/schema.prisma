@@ -68,6 +68,8 @@ model User {
   cartItems CartItem[]
   orders Order[]
   challengeParticipations ChallengeParticipant[]
+  mentoring             Mentoring?
+  mentoringApplications MentoringApplication[]
 
   @@map("users")
 }
@@ -340,10 +342,10 @@ model Payment{
 }
 
 model DaulyPaymentStats {
-  id String @id @default(uuid())
-  data DateTime @unique @db.Date
-  totalPayments Int @default(0) @map("total_payment")
-  totalAmount Int @default(0) @map("total_amount")
+  id                   String @id @default(uuid())
+  data                 DateTime @unique @db.Date
+  totalPayments        Int @default(0) @map("total_payment")
+  totalAmount          Int @default(0) @map("total_amount")
   createdAt            DateTime  @default(now()) @map("created_at")
   updatedAt            DateTime  @updatedAt @map("updated_at")
 
@@ -351,16 +353,17 @@ model DaulyPaymentStats {
 }
 
 model Challenge{
-  id String @id @default(uuid())
-  courseId String @unique @map("courseId")
+  id                   String @id @default(uuid())
+  courseId             String @unique @map("courseId")
 
-  maxParticipants Int @map("max_participants")
-  currentParticipants Int @default(0) @map("current_participants")
-  recruitStartAt DateTime  @map("recruit_start_at") 
-  recruitEndAt DateTime   @map("recruit_end_at")
-  challengeStartAt DateTime @map("challenge_start_at")
-  challengeEndAt DateTime @map("challenge_end_at")
-  status String @default("RECRUITING")
+  maxParticipants      Int @map("max_participants")
+  description          String? 
+  currentParticipants  Int @default(0) @map("current_participants")
+  recruitStartAt       DateTime  @map("recruit_start_at") 
+  recruitEndAt         DateTime   @map("recruit_end_at")
+  challengeStartAt     DateTime @map("challenge_start_at")
+  challengeEndAt       DateTime @map("challenge_end_at")
+  status               String @default("RECRUITING")
   createdAt            DateTime  @default(now()) @map("created_at")
   updatedAt            DateTime  @updatedAt @map("updated_at")
 
@@ -371,12 +374,12 @@ model Challenge{
 }
 
 model ChallengeParticipant {
-  id String @id @default(uuid())
-  challengeId String @map("challenge_id")
-  userId String @map("user_id")
+  id                   String @id @default(uuid())
+  challengeId          String @map("challenge_id")
+  userId               String @map("user_id")
 
-  joinedAt DateTime @default(now()) @map("joined_at ")
-  status String @default("ACTIVE")
+  joinedAt             DateTime @default(now()) @map("joined_at ")
+  status               String @default("ACTIVE")
   createdAt            DateTime  @default(now()) @map("created_at")
   updatedAt            DateTime  @updatedAt @map("updated_at")
 
@@ -385,4 +388,72 @@ model ChallengeParticipant {
 
   @@unique([challengeId, userId])
   @@map("challenge_participants")
+}
+
+model Mentoring{
+  id                  String @id @default(uuid())
+  userId              String @unique
+  name                String
+  jobRole             String
+  experience          String
+  company             String?
+  pricePerSession     Int       @map("price_per_session")
+  maxParticipants     Int       @map("max_participants")
+  sessionDuration     Int       @map("session_duration")
+  isActive            Boolean   @default(true) @map("is_active")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedules           MentoringSchedule[]
+  applications        MentoringApplication[]
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("mentorings")
+
+}
+
+model MentoringSchedule{
+  id                  String @id @default(uuid())
+  mentoringId         String    @map("mentoring_id")
+  dayOfWeek           Int       @map("day_of_week")
+  startTime           String    @map("start_time")
+  endTime             String    @map("end_time")
+
+  mentoring     Mentoring @relation(fields: [mentoringId], references: [id], onDelete: Cascade)
+  
+  @@index([mentoringId])
+  @@index([dayOfWeek])
+  @@map("mentoring_schedules")
+
+}
+
+model MentoringApplication {
+  id                  String    @id @default(uuid())
+  mentoringId         String    @map("mentoring_id")
+  applicantId         String    @map("applicant_id")
+  scheduledDate       DateTime  @map("scheduled_date")
+  phoneNumber         String    @map("phone_number")
+  email               String
+  message             String    
+  status              MentoringApplicationStatus  @default(PENDING)
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  
+  mentoring           Mentoring @relation(fields: [mentoringId], references: [id], onDelete: Cascade)
+  applicant           User      @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  
+  @@unique([mentoringId, applicantId, scheduledDate])
+  @@index([mentoringId])
+  @@index([applicantId])
+  @@index([status])
+  @@map("mentoring_applications")
+}
+
+enum MentoringApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
 }

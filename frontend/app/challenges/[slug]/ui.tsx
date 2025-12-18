@@ -10,6 +10,16 @@ import { Separator } from "@/components/ui/separator";
 import { Gift, Plus, Link as LinkIcon, Heart } from "lucide-react";
 import { joinChallenge } from "@/lib/api";
 import { toast } from "sonner";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getFavorite, addFavorite, removeFavorite } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { User } from "next-auth";
 import { ChallengeResponseDto } from "@/generated/openapi-client";
 
@@ -24,10 +34,10 @@ export default function ChallengeDetailUI({
 }: ChallengeDetailUIProps) {
   const router = useRouter();
   const [isJoining, setIsJoining] = useState(false);
-
   const [activeTab, setActiveTab] = useState<"intro" | "curriculum" | "review">(
     "intro"
   );
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const introRef = useRef<HTMLDivElement>(null);
   const curriculumRef = useRef<HTMLDivElement>(null);
   const reviewRef = useRef<HTMLDivElement>(null);
@@ -118,6 +128,60 @@ export default function ChallengeDetailUI({
     course.discountPrice && course.price > 0
       ? Math.round(((course.price - course.discountPrice) / course.price) * 100)
       : 0;
+
+  const getFavoriteQuery = useQuery({
+    queryKey: ["favorite", course.id],
+    queryFn: () => getFavorite(course.id),
+  });
+
+  const addFavoriteMutation = useMutation({
+    mutationFn: () => addFavorite(course.id),
+    onSuccess: () => {
+      getFavoriteQuery.refetch();
+      toast.success("찜 목록에 추가되었습니다.");
+    },
+  });
+
+  const removeFavoriteMutation = useMutation({
+    mutationFn: () => removeFavorite(course.id),
+    onSuccess: () => {
+      getFavoriteQuery.refetch();
+      toast.success("찜 목록에서 제거되었습니다.");
+    },
+  });
+
+  const handleFavorite = useCallback(() => {
+    if (!user) {
+      toast.error("로그인 후 이용해주세요.");
+      router.push("/signin");
+      return;
+    }
+
+    if (getFavoriteQuery.data?.data?.isFavorite) {
+      removeFavoriteMutation.mutate();
+    } else {
+      addFavoriteMutation.mutate();
+    }
+  }, [
+    user,
+    getFavoriteQuery.data,
+    addFavoriteMutation,
+    removeFavoriteMutation,
+    router,
+  ]);
+
+  const isFavoriteDisabled =
+    addFavoriteMutation.isPending || removeFavoriteMutation.isPending;
+
+  const handleShare = useCallback(async () => {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("링크가 클립보드에 복사되었습니다!"); // Dialog 대신 Toast
+    } catch (error) {
+      toast.error("URL 복사에 실패했습니다.");
+    }
+  }, []);
 
   return (
     <div>
@@ -486,11 +550,40 @@ export default function ChallengeDetailUI({
                       <button className="p-2 hover:bg-gray-100 rounded">
                         <Plus className="w-5 h-5" />
                       </button>
-                      <button className="p-2 hover:bg-gray-100 rounded">
+
+                      {/* 공유 버튼 */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleShare();
+                        }}
+                        className="p-2 hover:bg-gray-100 rounded transition-colors"
+                        aria-label="공유하기"
+                      >
                         <LinkIcon className="w-5 h-5" />
                       </button>
-                      <button className="p-2 hover:bg-gray-100 rounded">
-                        <Heart className="w-5 h-5" />
+
+                      {/* 좋아요 버튼 */}
+                      <button
+                        onClick={handleFavorite}
+                        disabled={isFavoriteDisabled}
+                        className={cn(
+                          "p-2 rounded transition-colors",
+                          getFavoriteQuery.data?.data?.isFavorite
+                            ? "bg-red-50 hover:bg-red-100"
+                            : "hover:bg-gray-100",
+                          isFavoriteDisabled && "cursor-not-allowed opacity-50"
+                        )}
+                        aria-label="좋아요"
+                      >
+                        <Heart
+                          className={cn(
+                            "w-5 h-5 transition-all",
+                            getFavoriteQuery.data?.data?.isFavorite
+                              ? "fill-red-500 text-red-500"
+                              : "text-gray-700"
+                          )}
+                        />
                       </button>
                     </div>
                   </div>

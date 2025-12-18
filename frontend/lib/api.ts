@@ -66,6 +66,20 @@ import {
   challengesControllerRemove,
   challengesControllerUpdate,
   UpdateChallengeDto,
+  CreateMentoringDto,
+  mentoringsControllerCreate,
+  mentoringsControllerFindMyMentoring,
+  UpdateMentoringDto,
+  mentoringsControllerUpdate,
+  mentoringsControllerToggleActive,
+  mentoringsControllerDelete,
+  mentoringsControllerFindAll,
+  CreateApplicationDto,
+  mentoringsControllerApplyForMentoring,
+  UpdateApplicationStatusDto,
+  mentoringsControllerGetApplications,
+  mentoringsControllerGetMyApplications,
+  mentoringsControllerUpdateApplicationStatus,
 } from "@/generated/openapi-client";
 
 export const getAllCategories = async () => {
@@ -589,5 +603,82 @@ export const deleteCourseChallenge = async (courseId: string) => {
     },
   });
 
+  return { data, error };
+};
+
+export const createMentoring = async (
+  createMentoringDto: CreateMentoringDto
+) => {
+  const { data, error } = await mentoringsControllerCreate({
+    body: createMentoringDto,
+  });
+
+  return { data, error };
+};
+
+export const getMyMentoring = async () => {
+  const { data, error } = await mentoringsControllerFindMyMentoring();
+  return { data, error };
+};
+
+export const updateMentoring = async (
+  id: string,
+  updateMentoringDto: UpdateMentoringDto
+) => {
+  const { data, error } = await mentoringsControllerUpdate({
+    path: { id },
+    body: updateMentoringDto,
+  });
+  return { data, error };
+};
+
+export const toggleMentoring = async (id: string) => {
+  const { data, error } = await mentoringsControllerToggleActive({
+    path: { id },
+  });
+  return { data, error };
+};
+
+export const deleteMentoring = async (id: string) => {
+  const { data, error } = await mentoringsControllerDelete({
+    path: { id },
+  });
+  return { data, error };
+};
+
+export const getAllMentoring = async () => {
+  const { data, error } = await mentoringsControllerFindAll();
+  return { data, error };
+};
+
+export const applyForMentoring = async (
+  mentoringId: string,
+  createApplicationDto: CreateApplicationDto
+) => {
+  const { data, error } = await mentoringsControllerApplyForMentoring({
+    path: { id: mentoringId },
+    body: createApplicationDto,
+  });
+  return { data, error };
+};
+export const getMentoringApplications = async (mentoringId: string) => {
+  const { data, error } = await mentoringsControllerGetApplications({
+    path: { id: mentoringId },
+  });
+  return { data, error };
+};
+export const getMyApplications = async () => {
+  const { data, error } = await mentoringsControllerGetMyApplications();
+  return { data, error };
+};
+
+export const updateApplicationStatus = async (
+  applicationId: string,
+  updateApplicationStatusDto: UpdateApplicationStatusDto
+) => {
+  const { data, error } = await mentoringsControllerUpdateApplicationStatus({
+    path: { applicationId },
+    body: updateApplicationStatusDto,
+  });
   return { data, error };
 };

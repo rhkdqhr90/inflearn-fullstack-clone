@@ -22,7 +22,7 @@ const sidebarItems = [
   },
   {
     label: "멘토링 관리",
-    href: "/instructor#",
+    href: "/instructor/mentoring",
   },
   {
     label: "강의 질문 관리",

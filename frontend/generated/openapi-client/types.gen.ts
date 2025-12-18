@@ -271,6 +271,50 @@ export type Course = {
     challenge?: Challenge;
 };
 
+export type MentoringSchedule = {
+    id: string;
+    mentoringId: string;
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    mentoring: Mentoring;
+};
+
+export type MentoringApplicationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED';
+
+export type MentoringApplication = {
+    id: string;
+    mentoringId: string;
+    applicantId: string;
+    scheduledDate: string;
+    phoneNumber: string;
+    email: string;
+    message: string;
+    status: MentoringApplicationStatus;
+    createdAt: string;
+    updatedAt: string;
+    mentoring: Mentoring;
+    applicant: User;
+};
+
+export type Mentoring = {
+    id: string;
+    userId: string;
+    name: string;
+    jobRole: string;
+    experience: string;
+    company?: string;
+    pricePerSession: number;
+    maxParticipants: number;
+    sessionDuration: number;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+    user: User;
+    schedules: Array<MentoringSchedule>;
+    applications: Array<MentoringApplication>;
+};
+
 export type User = {
     id: string;
     name?: string;
@@ -291,6 +335,8 @@ export type User = {
     cartItems: Array<CartItem>;
     orders: Array<Order>;
     challengeParticipations: Array<ChallengeParticipant>;
+    mentoring?: Mentoring;
+    mentoringApplications: Array<MentoringApplication>;
 };
 
 export type CourseDetailDto = {
@@ -815,6 +861,106 @@ export type UpdateChallengeDto = {
      * 챌린지 상태
      */
     status?: 'RECRUITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+};
+
+export type CreateMentoringDto = {
+    /**
+     * 멘토링명
+     */
+    name: string;
+    /**
+     * 직군/직무
+     */
+    jobRole: string;
+    /**
+     * 경력
+     */
+    experience: string;
+    /**
+     * 소속 회사(선택)
+     */
+    company: string;
+    /**
+     * 1회 가격
+     */
+    pricePerSession: number;
+    /**
+     * 1회 최대 인원
+     */
+    maxParticipants: number;
+    /**
+     * 1회 시간 (분)
+     */
+    sessionDuration: number;
+    /**
+     * 스케쥴 목록
+     */
+    schedules: Array<string>;
+};
+
+export type UpdateMentoringDto = {
+    /**
+     * 멘토링명
+     */
+    name?: string;
+    /**
+     * 직군/직무
+     */
+    jobRole?: string;
+    /**
+     * 경력
+     */
+    experience?: string;
+    /**
+     * 소속 회사(선택)
+     */
+    company?: string;
+    /**
+     * 1회 가격
+     */
+    pricePerSession?: number;
+    /**
+     * 1회 최대 인원
+     */
+    maxParticipants?: number;
+    /**
+     * 1회 시간 (분)
+     */
+    sessionDuration?: number;
+    /**
+     * 스케쥴 목록
+     */
+    schedules?: Array<string>;
+    /**
+     * 멘토링 활성화 여부
+     */
+    isActive?: boolean;
+};
+
+export type CreateApplicationDto = {
+    /**
+     * 신청할 날짜 시간
+     */
+    scheduledDate: string;
+    /**
+     * 연락 가능한 연락처(멘토에게만 공개
+     */
+    phoneNumber: string;
+    /**
+     * 연락 가능한 이메일(멘토에게만 공개
+     */
+    email: string;
+    /**
+     * 지식공유자에게 남길 메시지
+     */
+    message: string;
+};
+
+export type UpdateApplicationStatusDto = {
+    /**
+     * 신청 상태
+     */
+    status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED';
 };
 
 export type AppControllerGetHelloData = {
@@ -1815,6 +1961,160 @@ export type ChallengesControllerGetParticipantsData = {
 export type ChallengesControllerGetParticipantsResponses = {
     /**
      * 참가자 목록
+     */
+    200: unknown;
+};
+
+export type MentoringsControllerFindAllData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/mentorings';
+};
+
+export type MentoringsControllerFindAllResponses = {
+    /**
+     * 멘토링 목록 조회
+     */
+    200: unknown;
+};
+
+export type MentoringsControllerCreateData = {
+    body: CreateMentoringDto;
+    path?: never;
+    query?: never;
+    url: '/mentorings';
+};
+
+export type MentoringsControllerCreateResponses = {
+    /**
+     * 멘토링이 생성
+     */
+    200: CreateMentoringDto;
+};
+
+export type MentoringsControllerCreateResponse = MentoringsControllerCreateResponses[keyof MentoringsControllerCreateResponses];
+
+export type MentoringsControllerFindMyMentoringData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/mentorings/my';
+};
+
+export type MentoringsControllerFindMyMentoringResponses = {
+    /**
+     * 멘토링 조회
+     */
+    200: unknown;
+};
+
+export type MentoringsControllerDeleteData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/mentorings/{id}';
+};
+
+export type MentoringsControllerDeleteResponses = {
+    /**
+     * 멘토링 삭제
+     */
+    200: unknown;
+};
+
+export type MentoringsControllerUpdateData = {
+    body: UpdateMentoringDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/mentorings/{id}';
+};
+
+export type MentoringsControllerUpdateResponses = {
+    /**
+     * 멘토링 수정
+     */
+    200: unknown;
+};
+
+export type MentoringsControllerToggleActiveData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/mentorings/{id}/toggle';
+};
+
+export type MentoringsControllerToggleActiveResponses = {
+    /**
+     * 멘토링 활성화
+     */
+    200: unknown;
+};
+
+export type MentoringsControllerApplyForMentoringData = {
+    body: CreateApplicationDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/mentorings/{id}/apply';
+};
+
+export type MentoringsControllerApplyForMentoringResponses = {
+    /**
+     * 멘토링 신청 관리
+     */
+    200: unknown;
+};
+
+export type MentoringsControllerGetApplicationsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/mentorings/{id}/applications';
+};
+
+export type MentoringsControllerGetApplicationsResponses = {
+    /**
+     * 멘토링 신청 목록 조회
+     */
+    200: unknown;
+};
+
+export type MentoringsControllerGetMyApplicationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/mentorings/applications/my';
+};
+
+export type MentoringsControllerGetMyApplicationsResponses = {
+    /**
+     * 내 멘토링 신청 목록 조회
+     */
+    200: unknown;
+};
+
+export type MentoringsControllerUpdateApplicationStatusData = {
+    body: UpdateApplicationStatusDto;
+    path: {
+        applicationId: string;
+    };
+    query?: never;
+    url: '/mentorings/applications/{applicationId}/status';
+};
+
+export type MentoringsControllerUpdateApplicationStatusResponses = {
+    /**
+     * 멘토링 신청서 업데이트
      */
     200: unknown;
 };
