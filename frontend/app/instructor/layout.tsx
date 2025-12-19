@@ -1,6 +1,5 @@
-import InstructorPageNme from "./_components/instructor-page-name";
+import InstructorPageName from "./_components/instructor-page-name";
 import InstructorSidebar from "./_components/instructor-sidebar";
-import InstructorPage from "./page";
 
 export default function InstructorLayout({
   children,
@@ -9,10 +8,10 @@ export default function InstructorLayout({
 }) {
   return (
     <div className="flex flex-col">
-      <InstructorPageNme></InstructorPageNme>
+      <InstructorPageName />
 
       <div className="flex w-6xl mx-auto">
-        <InstructorSidebar></InstructorSidebar>
+        <InstructorSidebar />
         {children}
       </div>
     </div>

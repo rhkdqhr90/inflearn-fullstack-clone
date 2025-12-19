@@ -2,20 +2,38 @@ import { getMyMentoring, getMentoringApplications } from "@/lib/api";
 import { InstructorMentoringUI } from "./ui";
 
 export default async function InstructorMentoringPage() {
-  // SSR: 서버에서 데이터 페칭
   const mentoringResult = await getMyMentoring();
+  console.log("📦 page.tsx mentoringResult:", mentoringResult);
 
-  let applicationsResult: any = { data: null, error: null };
-  if (mentoringResult.data) {
-    // 타입 단언: OpenAPI 타입과 실제 응답 불일치 해결
-    const mentoring = mentoringResult.data as any;
-    applicationsResult = await getMentoringApplications(mentoring.id);
+  const mentoring = mentoringResult.data as any;
+  console.log("🔍 page.tsx mentoring:", mentoring);
+  console.log("🔍 mentoring type:", typeof mentoring);
+  console.log("🔍 mentoring truthy:", !!mentoring);
+
+  // 멘토링이 있을 때만 신청자 조회
+  let applications: any[] = [];
+  if (
+    mentoring &&
+    typeof mentoring === "object" &&
+    "id" in mentoring &&
+    mentoring.id
+  ) {
+    const applicationsResult = await getMentoringApplications(
+      mentoring.id as string
+    );
+    applications = (applicationsResult.data as any[]) || [];
   }
+
+  const finalMentoring =
+    mentoring && typeof mentoring === "object" && "id" in mentoring
+      ? mentoring
+      : null;
+  console.log("✅ page.tsx finalMentoring:", finalMentoring);
 
   return (
     <InstructorMentoringUI
-      initialMentoring={mentoringResult.data}
-      initialApplications={applicationsResult.data || []}
+      initialMentoring={finalMentoring}
+      initialApplications={applications}
     />
   );
 }

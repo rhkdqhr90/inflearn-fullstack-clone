@@ -632,13 +632,6 @@ export const updateMentoring = async (
   return { data, error };
 };
 
-export const toggleMentoring = async (id: string) => {
-  const { data, error } = await mentoringsControllerToggleActive({
-    path: { id },
-  });
-  return { data, error };
-};
-
 export const deleteMentoring = async (id: string) => {
   const { data, error } = await mentoringsControllerDelete({
     path: { id },
@@ -679,6 +672,13 @@ export const updateApplicationStatus = async (
   const { data, error } = await mentoringsControllerUpdateApplicationStatus({
     path: { applicationId },
     body: updateApplicationStatusDto,
+  });
+  return { data, error };
+};
+
+export const toggleActive = async (id: string) => {
+  const { data, error } = await mentoringsControllerToggleActive({
+    path: { id },
   });
   return { data, error };
 };

@@ -8,6 +8,10 @@ export class CreateMentoringDto {
   @IsString()
   name: string;
 
+  @ApiProperty({ description: '멘토링 제목' })
+  @IsString()
+  title: string;
+
   @ApiProperty({ description: '직군/직무' })
   @IsString()
   jobRole: string;
@@ -20,6 +24,11 @@ export class CreateMentoringDto {
   @IsString()
   @IsOptional()
   company?: string;
+
+  @ApiProperty({ description: '기술스택', type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  skills: string[];
 
   @ApiProperty({ description: '1회 가격', minimum: 0 })
   @IsInt()

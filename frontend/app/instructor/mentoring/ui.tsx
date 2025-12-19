@@ -1,17 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { MentoringForm } from "@/components/mentoring/mentoring-form";
+import { ApplicationsTable } from "@/components/mentoring/applications-table";
+import { deleteMentoring } from "@/lib/api";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,20 +17,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { MentoringForm } from "@/components/mentorings/mentoring-form";
-import { ApplicationsDialog } from "@/components/mentorings/applications-dialog";
-import { toggleMentoring, deleteMentoring } from "@/lib/api";
-import { toast } from "sonner";
 import {
-  formatDayOfWeek,
-  formatPrice,
-  formatDuration,
-  formatTimeRange,
-} from "@/lib/mentoring-utils";
-import { Bell } from "lucide-react";
-import { useRouter } from "next/navigation";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface InstructorMentoringUIProps {
   initialMentoring: any;
@@ -48,275 +37,253 @@ export function InstructorMentoringUI({
   const router = useRouter();
   const [mentoring, setMentoring] = useState(initialMentoring);
   const [applications, setApplications] = useState(initialApplications);
-  const [isToggling, setIsToggling] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [applicationsDialogOpen, setApplicationsDialogOpen] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showSettingDialog, setShowSettingDialog] = useState(false);
 
-  const handleToggle = async () => {
-    if (!mentoring) return;
+  const m = mentoring as any;
 
-    setIsToggling(true);
-    const result = await toggleMentoring((mentoring as any).id);
-    if (result.error) {
-      const error = result.error as any;
-      const errorMessage =
-        typeof result.error === "string"
-          ? error
-          : error.message || "멘토링 상태 변경에 실패했습니다.";
-      toast.error(errorMessage);
-    } else {
-      // 타입 단언으로 해결
-      const updatedMentoring = result.data as any;
-      toast.success(
-        updatedMentoring?.isActive
-          ? "멘토링이 활성화되었습니다."
-          : "멘토링이 비활성화되었습니다."
-      );
-      setMentoring(result.data);
+  // 헤더에서 발생하는 이벤트 리스닝
+  useEffect(() => {
+    const handleCreateToggle = (e: any) => {    
+      setShowCreateForm(e.detail);   
+    };
+
+    const handleAction = (e: any) => {   
+      if (e.detail === "setting") {
+        setShowSettingDialog(true);
+      } else if (e.detail === "delete") {
+        setShowDeleteDialog(true);
+      }
+    };
+    // ✅ 리페치 이벤트 - mentoring 상태 업데이트
+    const handleRefetch = async (e: any) => {  
       router.refresh();
-    }
-    setIsToggling(false);
+    };
+    window.addEventListener("mentoring-create-toggle", handleCreateToggle);
+    window.addEventListener("mentoring-action", handleAction);
+    window.addEventListener("mentoring-refetch-ui", handleRefetch);
+
+    return () => {     
+      window.removeEventListener("mentoring-create-toggle", handleCreateToggle);
+      window.removeEventListener("mentoring-action", handleAction);
+      window.removeEventListener("mentoring-refetch-ui", handleRefetch);
+    };
+  }, [router]);
+
+  // showCreateForm 변경 감지
+  useEffect(() => {
+    console.log("🔄 showCreateForm 변경:", showCreateForm);
+  }, [showCreateForm]);
+
+  // 생성 성공
+  const handleCreateSuccess = () => {
+    setShowCreateForm(false);
+    toast.success("멘토링이 생성되었습니다!");   
+    window.location.reload();
   };
 
+  // 수정 성공
+  const handleSettingSuccess = () => {
+    setShowSettingDialog(false);
+    toast.success("멘토링 설정이 변경되었습니다!");
+    window.location.reload();
+  };
+
+  // 삭제
   const handleDelete = async () => {
     if (!mentoring) return;
 
-    const result = await deleteMentoring((mentoring as any).id);
+    const result = await deleteMentoring(m.id);
+
     if (result.error) {
       const error = result.error as any;
-
       const errorMessage =
-        typeof result.error === "string"
+        typeof error === "string"
           ? error
-          : error.message || "멘토링 삭제에 실패했습니다.";
+          : error?.message || "멘토링 삭제에 실패했습니다.";
       toast.error(errorMessage);
     } else {
       toast.success("멘토링이 삭제되었습니다.");
       setMentoring(null);
       setApplications([]);
-      router.refresh();
+      setShowDeleteDialog(false);
+      window.location.reload();
     }
   };
 
-  const handleFormSuccess = () => {
-    setIsDialogOpen(false);
-    router.refresh();
+ 
+  const handleViewDetail = (application: any) => {
+    toast.info("상세보기 기능은 Phase 2에서 구현됩니다.");
   };
 
-  const pendingCount = applications.filter(
-    (a) => a.status === "PENDING"
-  ).length;
-
-  // 타입 안전성을 위한 헬퍼
-  const m = mentoring as any;
-
-  if (!mentoring) {
-    return (
-      <div className="container mx-auto py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>멘토링 관리</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">
-                아직 멘토링을 생성하지 않았습니다.
-              </p>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>멘토링 생성하기</Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>멘토링 생성</DialogTitle>
-                  </DialogHeader>
-                  <MentoringForm onSuccess={handleFormSuccess} />
-                </DialogContent>
-              </Dialog>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto py-8">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">멘토링 관리</h1>
-        <div className="flex items-center gap-4">
-          {/* 신청 현황 버튼 */}
-          <Button
-            variant="outline"
-            className="relative"
-            onClick={() => setApplicationsDialogOpen(true)}
-          >
-            <Bell className="h-4 w-4 mr-2" />
-            신청 관리
-            {pendingCount > 0 && (
-              <Badge
-                variant="destructive"
-                className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
-              >
-                {pendingCount}
-              </Badge>
-            )}
-          </Button>
+    <div className="flex-1 p-8">
+      <div className="space-y-6">
+        {/* 멘토링이 없고 토글이 OFF인 경우 */}
+        {!mentoring && !showCreateForm && (
+          <Card>
+            <CardContent className="py-12">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold mb-2">멘토링을 시작하세요</h2>
+                <p className="text-gray-600 mb-6">
+                  상단의 토글을 ON으로 전환하면 멘토링을 생성할 수 있습니다.
+                </p>
+                <div className="text-sm text-gray-500">
+                  💡 토글을 켜면 멘토링 정보 입력 폼이 나타납니다.
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-          {/* 멘토링 ON/OFF */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">멘토링 설정</span>
-            <Switch
-              checked={m.isActive}
-              onCheckedChange={handleToggle}
-              disabled={isToggling}
+        {/* 멘토링 생성 폼 */}
+        {!mentoring && showCreateForm && (
+          <>
+            {console.log("✅ 생성 폼 렌더링 시작")}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>멘토링 정보 입력</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowCreateForm(false)}
+                  >
+                    취소
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <MentoringForm onSuccess={handleCreateSuccess} />
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {/* 멘토링이 있는 경우 */}
+        {mentoring && (
+          <>
+            {/* 멘토링 정보 카드 */}
+            <Card>
+              <CardHeader>
+                <CardTitle>멘토링 정보</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="text-sm text-gray-500 mb-1">1회 가격</div>
+                    <div className="text-xl font-bold">
+                      {m.pricePerSession?.toLocaleString() || 0}원
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500 mb-1">
+                      1회 최대 인원
+                    </div>
+                    <div className="text-xl font-bold">
+                      {m.maxParticipants || 0}명
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500 mb-1">1회 시간</div>
+                    <div className="text-xl font-bold">
+                      {Math.floor((m.sessionDuration || 0) / 60)}시간
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 text-sm text-gray-600">
+                  <span className="font-medium">{m.name}</span>
+                  <span className="mx-2">•</span>
+                  <span>{m.jobRole}</span>
+                  <span className="mx-2">•</span>
+                  <span>{m.experience}</span>
+                  {m.company && (
+                    <>
+                      <span className="mx-2">•</span>
+                      <span>{m.company}</span>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 멘토링 스케줄 */}
+            <Card>
+              <CardHeader>
+                <CardTitle>멘토링 스케줄</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {m.schedules && m.schedules.length > 0 ? (
+                    m.schedules.map((schedule: any) => (
+                      <div
+                        key={schedule.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      >
+                        <span className="font-medium">
+                          {
+                            ["일", "월", "화", "수", "목", "금", "토"][
+                              schedule.dayOfWeek
+                            ]
+                          }
+                          요일
+                        </span>
+                        <span className="text-sm text-gray-600">
+                          {schedule.startTime} ~ {schedule.endTime}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4 text-gray-500">
+                      등록된 스케줄이 없습니다.
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 신청자 목록 테이블 */}
+            <ApplicationsTable
+              applications={applications}
+              onViewDetail={handleViewDetail}
             />
-            <Badge variant={m.isActive ? "default" : "secondary"}>
-              {m.isActive ? "ON" : "OFF"}
-            </Badge>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-2xl">{m.name}</CardTitle>
-              <div className="flex gap-2 mt-2">
-                <Badge variant="outline">{m.jobRole}</Badge>
-                <Badge variant="outline">{m.experience}</Badge>
-                {m.company && <Badge variant="outline">{m.company}</Badge>}
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline">수정</Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>멘토링 수정</DialogTitle>
-                  </DialogHeader>
-                  <MentoringForm
-                    initialData={mentoring}
-                    onSuccess={handleFormSuccess}
-                  />
-                </DialogContent>
-              </Dialog>
+      {/* 멘토링 설정 Dialog */}
+      <Dialog open={showSettingDialog} onOpenChange={setShowSettingDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>멘토링 설정</DialogTitle>
+          </DialogHeader>
+          <MentoringForm
+            initialData={mentoring}
+            isEdit={true}
+            onSuccess={handleSettingSuccess}
+          />
+        </DialogContent>
+      </Dialog>
 
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive">삭제</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      멘토링을 삭제하시겠습니까?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      이 작업은 되돌릴 수 없습니다. 모든 신청 내역도 함께
-                      삭제됩니다.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>취소</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>
-                      삭제
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* 멘토링 정보 */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <div className="text-sm text-muted-foreground">1회 가격</div>
-              <div className="text-lg font-semibold">
-                {formatPrice(m.pricePerSession)}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">1회 최대 인원</div>
-              <div className="text-lg font-semibold">{m.maxParticipants}명</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">1회 시간</div>
-              <div className="text-lg font-semibold">
-                {formatDuration(m.sessionDuration)}
-              </div>
-            </div>
-          </div>
-
-          {/* 스케줄 */}
-          <div>
-            <h3 className="font-semibold mb-3">멘토링 스케줄</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {m.schedules
-                ?.sort((a: any, b: any) => a.dayOfWeek - b.dayOfWeek)
-                .map((schedule: any) => (
-                  <div
-                    key={schedule.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <span className="font-medium">
-                      {formatDayOfWeek(schedule.dayOfWeek)}요일
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {formatTimeRange(schedule.startTime, schedule.endTime)}
-                    </span>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          {/* 신청 현황 요약 */}
-          <div className="border-t pt-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold">신청 현황</h3>
-              <Button variant="ghost" size="sm">
-                전체 보기 →
-              </Button>
-            </div>
-            <div className="grid grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-muted rounded-lg">
-                <div className="text-2xl font-bold">{applications.length}</div>
-                <div className="text-sm text-muted-foreground">전체</div>
-              </div>
-              <div className="text-center p-4 bg-orange-50 rounded-lg">
-                <div className="text-2xl font-bold text-orange-600">
-                  {pendingCount}
-                </div>
-                <div className="text-sm text-muted-foreground">미승인</div>
-              </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">
-                  {applications.filter((a) => a.status === "ACCEPTED").length}
-                </div>
-                <div className="text-sm text-muted-foreground">수락</div>
-              </div>
-              <div className="text-center p-4 bg-red-50 rounded-lg">
-                <div className="text-2xl font-bold text-red-600">
-                  {applications.filter((a) => a.status === "REJECTED").length}
-                </div>
-                <div className="text-sm text-muted-foreground">거절</div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 신청 관리 Dialog */}
-      <ApplicationsDialog
-        open={applicationsDialogOpen}
-        onOpenChange={setApplicationsDialogOpen}
-        applications={applications}
-        onUpdate={() => router.refresh()}
-      />
+      {/* 삭제 확인 Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>멘토링을 삭제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {applications.length > 0
+                ? `현재 ${applications.length}명의 신청자가 있습니다. 모든 신청 내역도 함께 삭제됩니다.`
+                : "이 작업은 되돌릴 수 없습니다."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>삭제</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

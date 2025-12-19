@@ -304,6 +304,7 @@ export type Mentoring = {
     jobRole: string;
     experience: string;
     company?: string;
+    description?: string;
     pricePerSession: number;
     maxParticipants: number;
     sessionDuration: number;
@@ -881,6 +882,10 @@ export type CreateMentoringDto = {
      */
     company: string;
     /**
+     * 기술스택
+     */
+    skills: Array<string>;
+    /**
      * 1회 가격
      */
     pricePerSession: number;
@@ -915,6 +920,10 @@ export type UpdateMentoringDto = {
      * 소속 회사(선택)
      */
     company?: string;
+    /**
+     * 기술스택
+     */
+    skills?: Array<string>;
     /**
      * 1회 가격
      */

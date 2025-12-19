@@ -7,6 +7,7 @@ import SiteHeader from "@/components/site-header";
 import { Toaster } from "sonner";
 import { auth } from "@/auth";
 import { InquiryFloatingButton } from "@/components/inquiry/Inquiry-floation-button";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -37,17 +38,20 @@ export default async function RootLayout({
     <html lang="en">
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased   max-w-[1460px] mx-auto px-6`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          <SiteHeader
-            session={session}
-            profile={profile?.data}
-            categories={categories.data ?? []}
-          ></SiteHeader>
-          <main>{children}</main>
-          <InquiryFloatingButton />
-        </Providers>
+     
+        <div className="max-w-[1460px] mx-auto px-6">
+          <Providers>
+            <SiteHeader
+              session={session}
+              profile={profile?.data}
+              categories={categories.data ?? []}
+            />
+            <main>{children}</main>
+            <InquiryFloatingButton />
+          </Providers>
+        </div>
         <Toaster />
       </body>
     </html>

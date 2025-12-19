@@ -131,4 +131,15 @@ html {
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Dialog 스크롤바 깜빡임 방지 */
+  body {
+    overflow-y: scroll !important;
+  }
+
+  /* Dialog 열렸을 때 스크롤 방지 (Radix UI가 추가하는 클래스) */
+  body[data-scroll-locked] {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+  }
 }

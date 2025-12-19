@@ -25,12 +25,24 @@ export class MentoringsService {
       );
     }
     const { schedules, ...mentoringData } = createMentoringDto;
+
+    const parsedSchedules = schedules.map((schedule) => {
+      if (typeof schedule === 'string') {
+        return JSON.parse(schedule) as {
+          dayOfWeek: number;
+          startTime: string;
+          endTime: string;
+        };
+      }
+      return schedule;
+    });
+
     return this.prisma.mentoring.create({
       data: {
         ...mentoringData,
         userId,
         schedules: {
-          create: schedules.map((schedule) => ({
+          create: parsedSchedules.map((schedule) => ({
             dayOfWeek: schedule.dayOfWeek,
             startTime: schedule.startTime,
             endTime: schedule.endTime,
@@ -135,12 +147,23 @@ export class MentoringsService {
         where: { mentoringId: id },
       });
 
+      const parsedSchedules = schedules.map((schedule) => {
+        if (typeof schedule === 'string') {
+          return JSON.parse(schedule) as {
+            dayOfWeek: number;
+            startTime: string;
+            endTime: string;
+          };
+        }
+        return schedule;
+      });
+
       return this.prisma.mentoring.update({
         where: { id },
         data: {
           ...mentoringData,
           schedules: {
-            create: schedules.map((schedule) => ({
+            create: parsedSchedules.map((schedule) => ({
               dayOfWeek: schedule.dayOfWeek,
               startTime: schedule.startTime,
               endTime: schedule.endTime,

@@ -39,6 +39,10 @@ export default function SiteHeader({
 
   const router = useRouter();
 
+  // ✅ 멘토링 페이지 여부 확인
+  const isMentoringPage =
+    pathname === "/mentoring" || pathname.startsWith("/mentoring/");
+
   // 챌린지 상세 페이지 여부 확인
   const isChallengeDetailPage = pathname.match(/^\/challenges\/[^\/]+$/);
 
@@ -69,7 +73,8 @@ export default function SiteHeader({
   const isCategoryNeeded =
     pathname == "/" ||
     pathname.includes("/courses") ||
-    pathname.includes("/search");
+    pathname.includes("/search") ||
+    pathname.includes("/mentoring");
   const isInstructorPage =
     pathname?.includes("/instructor") ||
     pathname?.includes("/course") ||
@@ -402,8 +407,10 @@ export default function SiteHeader({
           </nav>
         )}
       </div>
-      {/* 배너 슬라이더 - 챌린지 상세에서는 숨김 */}
-      {!isInstructorPage && !isChallengeDetailPage && <HomeBannerSlider />}
+      {/* 배너 슬라이더 - 챌린지/멘토링에서는 숨김 */}
+      {!isInstructorPage && !isChallengeDetailPage && !isMentoringPage && (
+        <HomeBannerSlider />
+      )}
     </header>
   );
 }
