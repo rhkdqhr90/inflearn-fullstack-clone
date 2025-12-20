@@ -6,6 +6,7 @@
 - [문의하기] (#문의하기)
 - [챌린지] (#챌린지)
 - [멘토링] (#멘토링)
+- [수정사항] (#수정사항)
 
 
 ## 슬라이드배너 
@@ -61,6 +62,20 @@
 - 지식공유자는 기간내 1개의 멘토링만 생성 가능
 - 스케쥴 기반 예약
 
+### 프론트 엔드
+- frontend/app/mentoring,frontend/app/mentoring/[id]/apply 추가 
+
+
+
+
+
+
+
+
+## 수정사항
+- course-card.tsx 리뷰 가져오기(rating, totalReview)
+- 강의 만들기 시 카테고리 포함  frontend/app/course/[id]/edit/course_info 
+-
 
 
 
