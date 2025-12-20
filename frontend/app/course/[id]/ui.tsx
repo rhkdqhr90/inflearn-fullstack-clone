@@ -876,7 +876,7 @@ function FloatingMenu({
     },
   });
 
-  const handleEnroll = useCallback(() => {
+  const handleEnroll = useCallback(async () => {
     if (isEnrolled) {
       alert("이미 수강신청한 강의 입니다. 수강 화면으로 이동해주세요");
       return;
@@ -886,8 +886,20 @@ function FloatingMenu({
       return;
     }
     if (course.price > 0) {
-      alert("결제는 추후 예정입니다. 무료 강의를 이용해주세요.");
-      return;
+      if (course.price > 0) {
+        const result = await api.addToCart(course.id);
+
+        if (result.error) {
+          toast.error(
+            (result.error as any).message || "장바구니 추가에 실패했습니다."
+          );
+          return;
+        }
+
+        toast.success("장바구니에 추가되었습니다.");
+        router.push("/carts");
+        return;
+      }
     }
 
     enrollMutation.mutate();

@@ -18,20 +18,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, X, Clock, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 
 interface Application {
   id: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED" | "COMPLETED" | "CANCELLED";
   message: string;
   createdAt: string;
-  scheduledAt?: string;
-  canceledAt?: string;
-  user: {
+  scheduledDate?: string;
+  email?: string;
+  phoneNumber?: string;
+  applicant?: {
     id: string;
     name: string;
     email: string;
-    phone?: string;
+    image?: string;
   };
 }
 
@@ -180,7 +181,6 @@ export function ApplicationsTable({
               <TableHead>신청 메시지</TableHead>
               <TableHead>신청일시</TableHead>
               <TableHead>멘토링 일정</TableHead>
-              <TableHead>취소 일자</TableHead>
               <TableHead className="text-center">신청 정보</TableHead>
             </TableRow>
           </TableHeader>
@@ -188,7 +188,7 @@ export function ApplicationsTable({
             {sortedApplications.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={8}
+                  colSpan={7}
                   className="text-center py-12 text-gray-500"
                 >
                   신청 내역이 없습니다.
@@ -207,14 +207,16 @@ export function ApplicationsTable({
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{app.user.name}</div>
+                      <div className="font-medium">
+                        {app.applicant?.name || "알 수 없음"}
+                      </div>
                       <div className="text-sm text-gray-500">
-                        {app.user.email}
+                        {app.applicant?.email || app.email || "-"}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-gray-600">
-                    {app.user.phone || "-"}
+                    {app.phoneNumber || "-"}
                   </TableCell>
                   <TableCell className="max-w-[200px]">
                     <div className="truncate text-sm text-gray-600">
@@ -225,10 +227,7 @@ export function ApplicationsTable({
                     {formatDate(app.createdAt)}
                   </TableCell>
                   <TableCell className="text-sm text-gray-600">
-                    {app.scheduledAt ? formatDate(app.scheduledAt) : "-"}
-                  </TableCell>
-                  <TableCell className="text-sm text-gray-600">
-                    {app.canceledAt ? formatDate(app.canceledAt) : "-"}
+                    {app.scheduledDate ? formatDate(app.scheduledDate) : "-"}
                   </TableCell>
                   <TableCell className="text-center">
                     <Button

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MentoringForm } from "@/components/mentoring/mentoring-form";
 import { ApplicationsTable } from "@/components/mentoring/applications-table";
+import { ApplicationDetailModal } from "../_components/application-detail-modal";
 import { deleteMentoring } from "@/lib/api";
 import { toast } from "sonner";
 import {
@@ -41,15 +42,21 @@ export function InstructorMentoringUI({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showSettingDialog, setShowSettingDialog] = useState(false);
 
+  // 신청 상세보기 모달 state
+  const [selectedApplication, setSelectedApplication] = useState<any | null>(
+    null
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const m = mentoring as any;
 
   // 헤더에서 발생하는 이벤트 리스닝
   useEffect(() => {
-    const handleCreateToggle = (e: any) => {    
-      setShowCreateForm(e.detail);   
+    const handleCreateToggle = (e: any) => {
+      setShowCreateForm(e.detail);
     };
 
-    const handleAction = (e: any) => {   
+    const handleAction = (e: any) => {
       if (e.detail === "setting") {
         setShowSettingDialog(true);
       } else if (e.detail === "delete") {
@@ -57,14 +64,14 @@ export function InstructorMentoringUI({
       }
     };
     // ✅ 리페치 이벤트 - mentoring 상태 업데이트
-    const handleRefetch = async (e: any) => {  
+    const handleRefetch = async (e: any) => {
       router.refresh();
     };
     window.addEventListener("mentoring-create-toggle", handleCreateToggle);
     window.addEventListener("mentoring-action", handleAction);
     window.addEventListener("mentoring-refetch-ui", handleRefetch);
 
-    return () => {     
+    return () => {
       window.removeEventListener("mentoring-create-toggle", handleCreateToggle);
       window.removeEventListener("mentoring-action", handleAction);
       window.removeEventListener("mentoring-refetch-ui", handleRefetch);
@@ -79,7 +86,7 @@ export function InstructorMentoringUI({
   // 생성 성공
   const handleCreateSuccess = () => {
     setShowCreateForm(false);
-    toast.success("멘토링이 생성되었습니다!");   
+    toast.success("멘토링이 생성되었습니다!");
     window.location.reload();
   };
 
@@ -112,9 +119,39 @@ export function InstructorMentoringUI({
     }
   };
 
- 
+  // 신청 상세보기
   const handleViewDetail = (application: any) => {
-    toast.info("상세보기 기능은 Phase 2에서 구현됩니다.");
+    setSelectedApplication(application);
+    setIsModalOpen(true);
+  };
+
+  // 모달 닫기
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedApplication(null);
+  };
+
+  // 신청 상태 업데이트 (승인/거절)
+  const handleStatusUpdate = async (
+    applicationId: string,
+    status: "ACCEPTED" | "REJECTED"
+  ) => {
+    try {
+      const { updateApplicationStatus } = await import("@/lib/api");
+      const { data, error } = await updateApplicationStatus(applicationId, {
+        status,
+      });
+
+      if (error) {
+        throw new Error("상태 업데이트 실패");
+      }
+
+      // 페이지 새로고침
+      window.location.reload();
+    } catch (error) {
+      console.error("상태 업데이트 오류:", error);
+      throw error;
+    }
   };
 
   return (
@@ -284,6 +321,14 @@ export function InstructorMentoringUI({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 신청 상세보기 모달 */}
+      <ApplicationDetailModal
+        application={selectedApplication}
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        onStatusUpdate={handleStatusUpdate}
+      />
     </div>
   );
 }

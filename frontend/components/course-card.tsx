@@ -11,9 +11,15 @@ import * as api from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { User } from "next-auth";
 import { toast } from "sonner";
+
+type CourseWithStats = CourseEntity & {
+  averageRating: number;
+  totalReviews: number;
+};
+
 interface CourseCardProps {
   user?: User;
-  course: CourseEntity;
+  course: CourseWithStats;
 }
 
 export default function CourseCard({ user, course }: CourseCardProps) {
@@ -169,8 +175,8 @@ export default function CourseCard({ user, course }: CourseCardProps) {
           <span>{course.instructor?.name || "강사명"}</span>
         </div>
 
-        {/* 가격 정보 */}
-        <div className="flex items-center justify-between">
+        {/* 가격 및 평점 정보 */}
+        <div className="flex flex-col gap-2">
           <div className="flex flex-col">
             {course.discountPrice && course.discountPrice < course.price ? (
               <>
@@ -197,11 +203,13 @@ export default function CourseCard({ user, course }: CourseCardProps) {
             )}
           </div>
 
-          {/* 평점 정보 (임시로 하드코딩) */}
+          {/* 평점 정보 */}
           <div className="flex items-center gap-1 text-xs">
             <span className="text-yellow-500">★</span>
-            <span className="font-medium">4.8</span>
-            <span className="text-gray-400">(213)</span>
+            <span className="font-medium">
+              {course.averageRating.toFixed(1)}
+            </span>
+            <span className="text-gray-400">({course.totalReviews})</span>
           </div>
         </div>
       </div>

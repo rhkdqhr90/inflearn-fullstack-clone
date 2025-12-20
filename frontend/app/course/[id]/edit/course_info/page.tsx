@@ -15,9 +15,10 @@ export default async function EditCourseInfoPage({
 }) {
   const { id } = await params;
   const course = await api.getCourseById(id);
+  const { data: categories } = await api.getAllCategories();
   if (!course.data || course.error) {
     notFound();
   }
 
-  return <UI course={course.data} />;
+  return <UI course={course.data} categories={categories || []} />;
 }

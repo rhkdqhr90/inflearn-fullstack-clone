@@ -19,9 +19,33 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
+import * as api from "@/lib/api";
 
 export default function UI({ courses }: { courses: Course[] }) {
   const router = useRouter();
+
+  const handleDeleteCourse = async (courseId: string, courseTitle: string) => {
+    const confirmed = window.confirm(
+      `"${courseTitle}" 강의를 정말 삭제하시겠습니까?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const result = await api.deleteCourse(courseId);
+
+      if (result.error) {
+        toast.error("강의 삭제에 실패했습니다.");
+        return;
+      }
+
+      toast.success("강의가 삭제되었습니다.");
+      router.refresh();
+    } catch (error) {
+      toast.error("강의 삭제 중 오류가 발생했습니다.");
+    }
+  };
 
   // 챌린지 관리 버튼 렌더링 로직
   const renderChallengeButton = (course: any) => {
@@ -168,9 +192,7 @@ export default function UI({ courses }: { courses: Course[] }) {
                   <TableCell className="flex flex-col gap-2 justify-center h-full">
                     <Button
                       onClick={() => {
-                        const confirmed =
-                          window.confirm("정말 삭제하시겠습니까?");
-                        console.log(confirmed);
+                        handleDeleteCourse(course.id, course.title);
                       }}
                       variant="destructive"
                       size="sm"

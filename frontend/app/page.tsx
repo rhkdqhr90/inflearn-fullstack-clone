@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import ContinueLearningSection from "@/components/continue-learning-section";
 import CourseList from "@/components/course-list";
 import { Metadata } from "next";
 export const metadata: Metadata = {
@@ -14,6 +15,7 @@ export default async function Home({
   const { page_number } = await searchParams;
   return (
     <div className="p-6 ">
+      <ContinueLearningSection />
       <CourseList q={""} page={page_number ? parseInt(page_number) : 1} />
     </div>
   );

@@ -10,7 +10,7 @@ export function MentoringListUI({ mentorings }: MentoringListUIProps) {
   return (
     <div>
       {/* 멘토링 배너 - 인프런 스타일 */}
-      <div className="relative bg-gradient-to-br from-emerald-100 via-cyan-50 to-sky-100 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-emerald-100 via-cyan-50 to-sky-100 overflow-hidden rounded-3xl mt-5">
         {/* 배경 장식 원들 */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-200/30 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-200/30 rounded-full blur-3xl"></div>

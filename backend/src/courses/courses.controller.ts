@@ -38,6 +38,7 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { InstructorReplyDto } from './dto/instructor-reply.dto';
 import { CourseReviewsResponseDto } from './dto/course-review-response.dto';
+import { CourseWithProgressDto } from './dto/course-with-progress.dto';
 
 @ApiTags('코스')
 @Controller('courses')
@@ -89,7 +90,7 @@ export class CoursesController {
   @ApiQuery({ name: 'take', required: false })
   @ApiOkResponse({
     description: '코스목록',
-    type: CourseEntity,
+    type: CourseWithProgressDto,
     isArray: true,
   })
   findAllMyCourses(@Req() req: Request) {

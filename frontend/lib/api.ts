@@ -80,6 +80,7 @@ import {
   mentoringsControllerGetApplications,
   mentoringsControllerGetMyApplications,
   mentoringsControllerUpdateApplicationStatus,
+  coursesControllerDlelete,
 } from "@/generated/openapi-client";
 
 export const getAllCategories = async () => {
@@ -372,6 +373,15 @@ export const deleteReview = async (reviewId: string) => {
     },
   });
 
+  return { data, error };
+};
+
+export const deleteCourse = async (id: string) => {
+  const { data, error } = await coursesControllerDlelete({
+    path: {
+      id,
+    },
+  });
   return { data, error };
 };
 

@@ -13,10 +13,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
-import { Course } from "@/generated/openapi-client";
-import { useMutation } from "@tanstack/react-query";
+import { Course, CourseCategory } from "@/generated/openapi-client";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import * as api from "@/lib/api";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type FormValues = {
   title: string;
@@ -25,9 +32,16 @@ type FormValues = {
   discountPrice: string;
   level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
   status: "PUBLISHED" | "DRAFT";
+  categoryId: string;
 };
 
-export default function EditCourseInfoUI({ course }: { course: Course }) {
+export default function EditCourseInfoUI({
+  course,
+  categories,
+}: {
+  course: Course;
+  categories: CourseCategory[];
+}) {
   const form = useForm<FormValues>({
     defaultValues: {
       title: course.title,
@@ -38,6 +52,7 @@ export default function EditCourseInfoUI({ course }: { course: Course }) {
         (course.level as "BEGINNER" | "INTERMEDIATE" | "ADVANCED") ??
         "BEGINNER",
       status: (course.status as "PUBLISHED" | "DRAFT") ?? "DRAFT",
+      categoryId: course.categories?.[0]?.id ?? "",
     },
   });
 
@@ -46,9 +61,13 @@ export default function EditCourseInfoUI({ course }: { course: Course }) {
   const updateCourseMutation = useMutation({
     mutationFn: (data: FormValues) =>
       api.updateCourse(course.id, {
-        ...data,
+        title: data.title,
+        shortDescription: data.shortDescription,
         price: parseInt(data.price),
-        discountPrice: parseInt(data.price),
+        discountPrice: parseInt(data.discountPrice),
+        level: data.level,
+        status: data.status,
+        categoryIds: data.categoryId ? [data.categoryId] : [],
       }),
     onSuccess: () => {
       toast.success("강의 정보가 성공적으로 업데이트 되었습니다!");
@@ -144,6 +163,38 @@ export default function EditCourseInfoUI({ course }: { course: Course }) {
                   placeholder="할인 가격이 있다면 입력하세요"
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="categoryId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                카테고리 <span className="text-red-500">*</span>
+              </FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="카테고리를 선택하세요" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                  sideOffset={4}
+                  className="w-[--radix-select-trigger-width] max-h-[300px]"
+                >
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

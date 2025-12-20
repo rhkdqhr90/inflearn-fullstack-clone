@@ -300,10 +300,12 @@ export type MentoringApplication = {
 export type Mentoring = {
     id: string;
     userId: string;
+    title: string;
     name: string;
     jobRole: string;
     experience: string;
     company?: string;
+    skills: Array<string>;
     description?: string;
     pricePerSession: number;
     maxParticipants: number;
@@ -870,6 +872,10 @@ export type CreateMentoringDto = {
      */
     name: string;
     /**
+     * 멘토링 제목
+     */
+    title: string;
+    /**
      * 직군/직무
      */
     jobRole: string;
@@ -908,6 +914,10 @@ export type UpdateMentoringDto = {
      * 멘토링명
      */
     name?: string;
+    /**
+     * 멘토링 제목
+     */
+    title?: string;
     /**
      * 직군/직무
      */

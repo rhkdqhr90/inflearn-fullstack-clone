@@ -22,6 +22,14 @@ import { CourseReview as CourseReviewEntity } from 'src/_gen/prisma-class/course
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { InstructorReplyDto } from './dto/instructor-reply.dto';
 import { CourseReviewsResponseDto } from './dto/course-review-response.dto';
+import { CourseWithProgressDto } from './dto/course-with-progress.dto';
+interface CourseWithProgress extends Course {
+  progress: number;
+  completedLectures: number;
+  totalLectures: number;
+  lastWatchedAt: Date;
+  enrolledAt: Date;
+}
 @Injectable()
 export class CoursesService {
   constructor(private prisma: PrismaService) {}
@@ -73,20 +81,70 @@ export class CoursesService {
     });
   }
 
-  async findAllMyCourses(userId: string): Promise<Course[]> {
+  async findAllMyCourses(userId: string): Promise<CourseWithProgressDto[]> {
     const enrollments = await this.prisma.courseEnrollment.findMany({
       where: {
         userId,
       },
-    });
-
-    return this.prisma.course.findMany({
-      where: {
-        id: {
-          in: enrollments.map((enrollment) => enrollment.courseId),
+      include: {
+        course: {
+          include: {
+            instructor: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            categories: true,
+            _count: {
+              select: {
+                lectures: true,
+              },
+            },
+          },
         },
       },
     });
+
+    const coursesWithProgress = await Promise.all(
+      enrollments.map(async (enrollment) => {
+        const activities = await this.prisma.lectureActivity.findMany({
+          where: {
+            userId,
+            courseId: enrollment.courseId,
+          },
+          orderBy: {
+            lastWatchedAt: 'desc',
+          },
+        });
+
+        const totalLectures = enrollment.course._count.lectures;
+        const completedLectures = activities.filter(
+          (a) => a.isCompleted,
+        ).length;
+        const progress =
+          totalLectures > 0 ? (completedLectures / totalLectures) * 100 : 0;
+        const lastWatchedAt =
+          activities[0]?.lastWatchedAt || enrollment.enrolledAt;
+
+        return {
+          ...enrollment.course,
+          progress: Math.round(progress),
+          completedLectures,
+          totalLectures,
+          lastWatchedAt,
+          enrolledAt: enrollment.enrolledAt,
+        } as CourseWithProgress;
+      }),
+    );
+
+    coursesWithProgress.sort(
+      (a, b) =>
+        new Date(b.lastWatchedAt).getTime() -
+        new Date(a.lastWatchedAt).getTime(),
+    );
+
+    return coursesWithProgress as CourseWithProgressDto[];
   }
 
   async findOne(id: string, userId?: string): Promise<CourseDetailDto | null> {
@@ -206,15 +264,24 @@ export class CoursesService {
       throw new NotFoundException(`ID: ${id} 코스를 찾을 수 없습니다.`);
     }
     const { categoryIds, ...otherData } = updateCourseDto;
+
     const data: Prisma.CourseUpdateInput = { ...otherData };
 
     if (course.instructorId !== userId) {
       throw new UnauthorizedException('강의 소유자만 수정할 수 있습니다.');
     }
-    if (categoryIds && categoryIds.length > 0) {
-      data.categories = {
-        connect: categoryIds.map((id) => ({ id })),
-      };
+    if (categoryIds !== undefined) {
+      if (categoryIds.length > 0) {
+        // 카테고리가 있으면: 기존 제거 후 새로 연결
+        data.categories = {
+          set: categoryIds.map((id) => ({ id })),
+        };
+      } else {
+        // 카테고리가 비어있으면: 모두 제거
+        data.categories = {
+          set: [],
+        };
+      }
     }
 
     return this.prisma.course.update({
@@ -290,6 +357,8 @@ export class CoursesService {
     const orderBy: Prisma.CourseOrderByWithRelationInput = {};
     if (sortBy == 'price') {
       orderBy.price = order as 'asc' | 'desc';
+    } else {
+      orderBy.createdAt = 'desc';
     }
     const skip = (page - 1) * pageSize;
     const totalItems = await this.prisma.course.count({ where });
@@ -306,6 +375,11 @@ export class CoursesService {
           },
         },
         categories: true,
+        reviews: {
+          select: {
+            rating: true,
+          },
+        },
         _count: {
           select: {
             enrollments: true,
@@ -320,8 +394,24 @@ export class CoursesService {
     const hasNext = page < totalPages;
     const hasPrev = page > 1;
 
+    const coursesWithStats = courses.map((course) => {
+      const totalReviews = course._count.reviews;
+      const averageRating =
+        totalReviews > 0
+          ? course.reviews.reduce((sum, review) => sum + review.rating, 0) /
+            totalReviews
+          : 0;
+
+      return {
+        ...course,
+        averageRating,
+        totalReviews,
+        reviews: undefined, // reviews 배열은 제거
+      };
+    });
+
     return {
-      courses: courses as any[],
+      courses: coursesWithStats as any[],
       pagination: {
         currentPage: page,
         totalPages,
