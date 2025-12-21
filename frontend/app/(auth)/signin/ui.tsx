@@ -27,7 +27,7 @@ export default function UI() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-4">
+    <div className="flex flex-col items-center justify-center min-h-screen -mt-40 gap-4">
       <h1 className="text-3xl font-bold">로그인</h1>
       <p className="text-gray-700">인프런 계정으로 로그인할 수 있어요</p>
 
@@ -50,7 +50,7 @@ export default function UI() {
           onChange={(e) => setPassword(e.target.value)}
           type="password"
           name="password"
-          placeholder="example@inflab.com"
+          placeholder="비밀번호를 입력하세요"
           className="border-2 border-gray-300 rounded-sm p-2"
         />
 

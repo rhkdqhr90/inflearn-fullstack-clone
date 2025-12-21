@@ -6,34 +6,54 @@ import { useCallback, useEffect, useState } from "react";
 
 interface BannerSlide {
   id: number;
+  tag?: string;
+  tagColor?: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   description: string;
   backgroundColor: string;
+  textColor: string;
+  image: string;
+  imagePosition?: "left" | "right";
 }
 
-// 배너 데이터 - 필요에 따라 API에서 가져올 수 있습니다
 const bannerSlides: BannerSlide[] = [
   {
     id: 1,
-    title: "프론트엔드 개발자를 위한",
-    subtitle: "7년차 엔지니어 최나실 멘토와 함께하는",
-    description: "실무기반 소수정예 4주 챌린지",
-    backgroundColor: "bg-green-800",
+    tag: "프론트엔드 개발자 필수",
+    tagColor: "bg-pink-500",
+    title: "Backend 101",
+    subtitle: "for Frontend Developers",
+    description: "NestJS와 TypeORM으로 배우는 백엔드 기초",
+    backgroundColor: "bg-black",
+    textColor: "text-white",
+    image: "/images/backend-101.jpg",
+    imagePosition: "right",
   },
   {
     id: 2,
-    title: "백엔드 개발의 모든 것",
-    subtitle: "현업 개발자와 함께하는",
-    description: "실전 프로젝트 완성 코스",
-    backgroundColor: "bg-blue-800",
+    tag: "Next.js 14 + Supabase",
+    tagColor: "bg-green-500",
+    title: "풀스택 앱 개발 마스터",
+    subtitle: "Instagram, Netflix, Dropbox 클론 코딩",
+    description: "실전 프로젝트로 배우는 현대적인 웹 개발",
+    backgroundColor: "bg-gradient-to-br from-green-600 to-emerald-700",
+    textColor: "text-white",
+    image: "/images/supabase-nextjs.jpg",
+    imagePosition: "right",
   },
   {
     id: 3,
-    title: "풀스택 개발자 되기",
-    subtitle: "처음부터 끝까지 완성하는",
-    description: "실무 중심 풀스택 트레이닝",
-    backgroundColor: "bg-purple-800",
+    tag: "Part 1",
+    tagColor: "bg-white text-black",
+    title: "Next × Nest",
+    subtitle: "Inflearn Clone",
+    description: "인프런 클론 코딩으로 배우는 풀스택 개발",
+    backgroundColor:
+      "bg-gradient-to-br from-emerald-500 via-teal-600 to-green-700",
+    textColor: "text-white",
+    image: "/images/inflearn-clone.jpg",
+    imagePosition: "right",
   },
 ];
 
@@ -129,11 +149,40 @@ export function HomeBannerSlider() {
                 key={slide.id}
                 className={`flex-[0_0_100%] min-w-0 ${slide.backgroundColor}`}
               >
-                <div className="h-64 flex items-center justify-center">
-                  <div className="text-center text-white px-4">
-                    <p className="text-lg mb-2">{slide.subtitle}</p>
-                    <p className="text-2xl font-bold mb-2">{slide.title}</p>
-                    <p className="text-xl">{slide.description}</p>
+                <div className="h-64 flex items-center">
+                  <div className="container mx-auto px-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                      {/* 왼쪽: 텍스트 */}
+                      <div className={`${slide.textColor} space-y-3`}>
+                        {slide.tag && (
+                          <span
+                            className={`${slide.tagColor} text-xs font-bold px-3 py-1 rounded-md inline-block`}
+                          >
+                            {slide.tag}
+                          </span>
+                        )}
+                        <h2 className="text-3xl lg:text-4xl font-bold">
+                          {slide.title}
+                        </h2>
+                        {slide.subtitle && (
+                          <p className="text-lg font-semibold opacity-95">
+                            {slide.subtitle}
+                          </p>
+                        )}
+                        <p className="text-sm opacity-90">
+                          {slide.description}
+                        </p>
+                      </div>
+
+                      {/* 오른쪽: 이미지 */}
+                      <div className="relative h-48 flex items-center justify-center">
+                        <img
+                          src={slide.image}
+                          alt={slide.title}
+                          className="h-full w-auto object-contain drop-shadow-2xl"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

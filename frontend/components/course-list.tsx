@@ -15,6 +15,7 @@ import { auth } from "@/auth";
 interface CourseListProps extends SearchCourseDto {
   baseUrl?: string;
 }
+type CourseWithStats = Parameters<typeof CourseCard>[0]["course"];
 
 export default async function CourseList({
   q,
@@ -139,7 +140,11 @@ export default async function CourseList({
       {/* 강의 목록 Grid */}
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {data.courses.map((course) => (
-          <CourseCard user={session?.user} key={course.id} course={course} />
+          <CourseCard
+            user={session?.user}
+            key={course.id}
+            course={course as CourseWithStats}
+          />
         ))}
       </div>
 

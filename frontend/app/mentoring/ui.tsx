@@ -1,6 +1,7 @@
 "use client";
 
 import { MentoringCard } from "@/components/mentoring/mentoring-card";
+import Link from "next/link";
 
 interface MentoringListUIProps {
   mentorings: any[];
@@ -25,11 +26,13 @@ export function MentoringListUI({ mentorings }: MentoringListUIProps) {
             </h1>
 
             <div className="flex items-center justify-center gap-4">
-              <button className="flex items-center gap-2 px-6 py-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
-                <span className="text-2xl">🌱</span>
-                <span className="font-semibold text-gray-700">멘토 지원</span>
-              </button>
-              <button className="flex items-center gap-2 px-6 py-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+              <Link href="/instructor/mentoring">
+                <button className="flex items-center gap-2 px-6 py-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 cursor-pointer">
+                  <span className="text-2xl">🌱</span>
+                  <span className="font-semibold text-gray-700">멘토 지원</span>
+                </button>
+              </Link>
+              <button className="flex items-center gap-2 px-6 py-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 cursor-pointer">
                 <span className="text-2xl">📋</span>
                 <span className="font-semibold text-gray-700">멘토링 찾기</span>
               </button>
@@ -87,9 +90,11 @@ export function MentoringListUI({ mentorings }: MentoringListUIProps) {
                   <br />
                   의미 있는 인사이트를 전해주세요!
                 </p>
-                <button className="px-6 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors shadow-sm">
-                  멘토 지원하기
-                </button>
+                <Link href="/instructor/mentoring">
+                  <button className="px-6 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors shadow-sm">
+                    멘토 지원하기
+                  </button>
+                </Link>
                 <div className="mt-6">
                   <div className="text-6xl opacity-50">🎯</div>
                   <div className="text-sm text-orange-400 font-bold mt-2 -rotate-12">

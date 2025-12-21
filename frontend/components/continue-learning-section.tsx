@@ -9,6 +9,7 @@ export default async function ContinueLearningSection() {
   if (!session?.user) {
     return null;
   }
+  console.log(session.user);
 
   const { data: courses } = await api.getAllMyCourses();
 

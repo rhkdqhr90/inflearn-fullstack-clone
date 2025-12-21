@@ -85,7 +85,7 @@ export default function SiteHeader({
       {/* 첫째 줄: 로고, 네비게이션, 지식공유, 아바타 */}
       <div className="container px-4 py-3 flex items-center justify-between">
         {/* 로고 */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 mr-20">
           <Image
             src="/images/inflearn_public_logo.svg"
             alt="inflearn logo"
@@ -343,19 +343,19 @@ export default function SiteHeader({
       </div>
       {/* 둘째 줄: 검색 바 - 챌린지 상세에서는 숨김 */}
       {!isInstructorPage && !isChallengeDetailPage && (
-        <div className="container mx-auto px-4 py-3  border-gray-100">
-          <div className="flex items-center justify-center">
+        <div className="w-full py-2 border-b border-gray-100">
+          <div className="flex items-center justify-center px-4">
             <div
-              className="flex items-center gap-2 bg-white border border-gray-300 rounded-4xl px-4 py-2.5"
-              style={{ width: "fit-content", minWidth: "400px" }}
+              className="flex items-center gap-2 bg-white border-2 border-gray-300 rounded-full px-4 py-2 hover:border-gray-400 transition-colors"
+              style={{ width: "500px", maxWidth: "90%" }}
             >
               <div className="flex items-center gap-1 text-gray-500">
                 <Image
                   src="/icons/course.png"
                   alt="강의"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5"
                   priority
                 />
                 <ChevronLeft className="w-3 h-3" />
@@ -363,7 +363,7 @@ export default function SiteHeader({
               <input
                 type="text"
                 placeholder="AI 시대에 필요한 무기, 지금 배워보세요."
-                className="flex-1 outline-none text-gray-700 placeholder-gray-400 min-w-0"
+                className="flex-1 outline-none text-sm text-gray-700 placeholder-gray-400"
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -374,7 +374,7 @@ export default function SiteHeader({
                 }}
               />
               <button
-                className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center hover:bg-green-700 transition-colors"
+                className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center hover:bg-green-700 transition-colors flex-shrink-0"
                 onClick={() => {
                   if (search.trim()) {
                     router.push(`/search?q=${search}`);

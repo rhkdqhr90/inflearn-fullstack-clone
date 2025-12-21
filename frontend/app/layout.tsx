@@ -7,6 +7,7 @@ import SiteHeader from "@/components/site-header";
 import { Toaster } from "sonner";
 import { auth } from "@/auth";
 import { InquiryFloatingButton } from "@/components/inquiry/Inquiry-floation-button";
+import SiteFooter from "@/components/site-footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +41,6 @@ export default async function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-     
         <div className="max-w-[1460px] mx-auto px-6">
           <Providers>
             <SiteHeader
@@ -52,6 +52,7 @@ export default async function RootLayout({
             <InquiryFloatingButton />
           </Providers>
         </div>
+        <SiteFooter />
         <Toaster />
       </body>
     </html>
