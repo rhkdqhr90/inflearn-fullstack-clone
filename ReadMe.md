@@ -100,4 +100,4 @@
 - course-card.tsx 리뷰 가져오기(rating, totalReview)
 - 강의 만들기 시 카테고리 포함 frontend/app/course/[id]/edit/course_info
 - site-footer(텍스트만) 생성
-- 각종 버그 수정 (로그인 위치)
+- 각종 버그 수정 (로그인 위치) 수정
