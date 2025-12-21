@@ -61,22 +61,13 @@ export function MentoringApplyUI({ mentoring }: MentoringApplyUIProps) {
     setIsSubmitting(true);
 
     try {
-      console.log("=== 신청 시작 ===");
-      console.log("멘토링 ID:", m.id);
-      console.log("폼 데이터:", formData);
-
-      // 실제 신청 API 호출
       const { applyForMentoring } = await import("@/lib/api");
 
-      // 선택한 스케줄 정보 가져오기
       const selectedSchedule = m.schedules?.find(
         (s: any) =>
           (s.id || `${m.schedules.indexOf(s)}`) === formData.scheduleId
       );
 
-      console.log("선택한 스케줄:", selectedSchedule);
-
-      // 다음 해당 요일의 날짜 계산
       const getNextDateForDay = (dayOfWeek: number) => {
         const today = new Date();
         const currentDay = today.getDay();
@@ -84,7 +75,6 @@ export function MentoringApplyUI({ mentoring }: MentoringApplyUIProps) {
         const targetDate = new Date(today);
         targetDate.setDate(today.getDate() + daysUntilTarget);
 
-        // 시간 설정
         if (selectedSchedule?.startTime) {
           const [hours, minutes] = selectedSchedule.startTime.split(":");
           targetDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
@@ -104,12 +94,7 @@ export function MentoringApplyUI({ mentoring }: MentoringApplyUIProps) {
         message: formData.message || "",
       };
 
-      console.log("신청 데이터:", applicationData);
-
       const { data, error } = await applyForMentoring(m.id, applicationData);
-
-      console.log("API 응답 - data:", data);
-      console.log("API 응답 - error:", error);
 
       if (error) {
         console.error("API 에러 상세:", error);
@@ -119,7 +104,7 @@ export function MentoringApplyUI({ mentoring }: MentoringApplyUIProps) {
       }
 
       toast.success("멘토링 신청이 완료되었습니다!");
-      router.push(`/mentoring/${m.id}`);
+      router.push(`/mentoring`);
     } catch (error) {
       console.error("신청 오류 (catch):", error);
       toast.error(`신청 중 오류가 발생했습니다: ${error}`);
