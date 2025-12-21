@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Gift, Plus, Link as LinkIcon, Heart } from "lucide-react";
-import { joinChallenge } from "@/lib/api";
+import { addToCart, getChallengeParticipants, joinChallenge } from "@/lib/api";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getFavorite, addFavorite, removeFavorite } from "@/lib/api";
@@ -85,11 +85,31 @@ export default function ChallengeDetailUI({
   const daysLeft = Math.ceil(
     (recruitEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
   );
+  const participantsQuery = useQuery({
+    queryKey: ["challenge-participants", course.slug],
+    queryFn: () => getChallengeParticipants(course.slug),
+    enabled: !!user,
+  });
+
+  const participants = participantsQuery.data?.data;
+  const isAlreadyJoined =
+    participants && Array.isArray(participants)
+      ? participants.some((participant: any) => participant.userId === user?.id)
+      : false;
 
   const handleJoinChallenge = useCallback(async () => {
     if (!user) {
       toast.error("로그인이 필요합니다.");
       router.push("/signin");
+      return;
+    }
+
+    const challengeStart = new Date(challenge.challengeStartAt);
+    const challengeEnd = new Date(challenge.challengeEndAt);
+    const isChallengePeriod = now >= challengeStart && now <= challengeEnd;
+
+    if (isChallengePeriod && isAlreadyJoined) {
+      router.push(`/courses/lecture?courseId=${course.id}`);
       return;
     }
 
@@ -100,7 +120,6 @@ export default function ChallengeDetailUI({
     setIsJoining(true);
     try {
       const result = await joinChallenge(course.slug);
-      const response = result.data as any;
 
       if (result.error) {
         toast.error(
@@ -109,20 +128,43 @@ export default function ChallengeDetailUI({
         return;
       }
 
-      if (response.message) {
-        toast.success(response.message);
-        if (response.redirect) {
-          router.push(response.redirect);
-        } else {
-          router.refresh();
+      const cartResult = await addToCart(course.id);
+
+      if (cartResult.error) {
+        const errorStatus = (cartResult.error as any).statusCode;
+
+        // 409 에러 (이미 장바구니에 있음) - 정상 처리
+        if (errorStatus === 409) {
+          toast.success("챌린지 신청이 완료되었습니다!");
+          router.push("/carts");
+          return;
         }
+
+        // 다른 에러
+        toast.error("장바구니 추가에 실패했습니다.");
+        setIsJoining(false);
+        return;
       }
+
+      // 3. 성공 - 장바구니로 이동
+      toast.success("챌린지 신청이 완료되었습니다!");
+      router.push("/carts");
     } catch (error) {
       toast.error("챌린지 신청 중 오류가 발생했습니다.");
     } finally {
       setIsJoining(false);
     }
-  }, [user, course.slug, isRecruiting, isFull, router]);
+  }, [
+    user,
+    course.slug,
+    course.id,
+    isRecruiting,
+    isFull,
+    router,
+    challenge,
+    now,
+    isAlreadyJoined,
+  ]);
 
   const discountRate =
     course.discountPrice && course.price > 0
@@ -524,11 +566,14 @@ export default function ChallengeDetailUI({
                       isBeforeRecruit ||
                       !isRecruiting ||
                       isFull ||
-                      isJoining
+                      isJoining ||
+                      isAlreadyJoined // ✅ 이미 신청한 경우 비활성화
                     }
                   >
                     {!user
                       ? "로그인 후 신청하기"
+                      : isAlreadyJoined // ✅ 신청 완료 상태 표시
+                      ? "신청완료"
                       : isBeforeRecruit
                       ? "모집 시작 전입니다"
                       : isFull
