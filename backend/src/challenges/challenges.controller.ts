@@ -23,6 +23,7 @@ import { Request } from 'express';
 import { CreateChallengeDto } from './dto/create-challnege.dto';
 import { ChallengeResponseDto } from './dto/challenge-response.dto';
 import { UpdateChallengeDto } from './dto/update-challenge.dto';
+import { OptionalAccessTokenGuard } from 'src/auth/guards/optional=access-token.guard';
 
 @ApiTags('챌린지')
 @Controller('')
@@ -95,12 +96,14 @@ export class ChallengesController {
 
   @Get('challenges/:slug')
   @ApiOperation({ summary: '챌린지 상세 조회 (슬러그)' })
+  @UseGuards(OptionalAccessTokenGuard)
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({
     description: '챌린지 상세 정보',
     type: ChallengeResponseDto,
   })
-  findOneBySlug(@Param('slug') slug: string) {
-    return this.challengesService.findOneBySlug(slug);
+  findOneBySlug(@Param('slug') slug: string, @Req() req: Request) {
+    return this.challengesService.findOneBySlug(slug, req.user?.sub);
   }
 
   //챌린지 신청

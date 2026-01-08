@@ -342,6 +342,54 @@ export type User = {
     mentoringApplications: Array<MentoringApplication>;
 };
 
+export type CourseWithProgressDto = {
+    id: string;
+    slug: string;
+    title: string;
+    shortDescription?: string;
+    description?: string;
+    thumbnailUrl?: string;
+    price: number;
+    discountPrice?: number;
+    level: string;
+    status: string;
+    instructorId: string;
+    createdAt: string;
+    updatedAt: string;
+    instructor: User;
+    sections: Array<Section>;
+    lectures: Array<Lecture>;
+    categories: Array<CourseCategory>;
+    enrollments: Array<CourseEnrollment>;
+    reviews: Array<CourseReview>;
+    questions: Array<CourseQuestion>;
+    favorites: Array<CourseFavorite>;
+    lectureActivities: Array<LectureActivity>;
+    cartItems: Array<CartItem>;
+    orderItems: Array<OrderItem>;
+    challenge?: Challenge;
+    /**
+     * 진도율 (0-100)
+     */
+    progress: number;
+    /**
+     * 완료한 강의 수
+     */
+    completedLectures: number;
+    /**
+     * 전체 강의 수
+     */
+    totalLectures: number;
+    /**
+     * 마지막 학습 시간
+     */
+    lastWatchedAt: string;
+    /**
+     * 수강 시작 시간
+     */
+    enrolledAt: string;
+};
+
 export type CourseDetailDto = {
     id: string;
     slug: string;
@@ -837,6 +885,10 @@ export type ChallengeResponseDto = {
      * 참가자 목록
      */
     participants?: Array<string>;
+    /**
+     * 참가 여부
+     */
+    isJoined?: boolean;
 };
 
 export type UpdateChallengeDto = {
@@ -1053,7 +1105,7 @@ export type CoursesControllerFindAllMyCoursesResponses = {
     /**
      * 코스목록
      */
-    200: Array<Course>;
+    200: Array<CourseWithProgressDto>;
 };
 
 export type CoursesControllerFindAllMyCoursesResponse = CoursesControllerFindAllMyCoursesResponses[keyof CoursesControllerFindAllMyCoursesResponses];

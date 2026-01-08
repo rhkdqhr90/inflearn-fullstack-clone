@@ -168,7 +168,8 @@ export class ChallengesService {
     return challenge;
   }
 
-  async findOneBySlug(slug: string) {
+  async findOneBySlug(slug: string, userId?: string) {
+    console.log('[findOneBySlug] userId:', userId);
     const course = await this.prisma.course.findUnique({
       where: { slug },
       include: {
@@ -200,6 +201,10 @@ export class ChallengesService {
                 participants: true,
               },
             },
+            participants: {
+              where: userId ? { userId } : undefined,
+              select: { id: true },
+            },
           },
         },
       },
@@ -208,7 +213,13 @@ export class ChallengesService {
       throw new NotFoundException('챌린지를 찾을 수 없습니다.');
     }
 
-    return course.challenge;
+    const challenge = course.challenge;
+
+    return {
+      ...challenge,
+      currentParticipants: challenge._count.participants,
+      isJoined: userId ? challenge.participants.length > 0 : false,
+    };
   }
 
   async join(userId: string, slug: string) {

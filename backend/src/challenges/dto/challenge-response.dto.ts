@@ -47,4 +47,7 @@ export class ChallengeResponseDto {
 
   @ApiPropertyOptional({ description: '참가자 목록' })
   participants?: any[];
+
+  @ApiPropertyOptional({ description: '참가 여부' })
+  isJoined?: boolean;
 }

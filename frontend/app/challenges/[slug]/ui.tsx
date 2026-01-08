@@ -85,18 +85,8 @@ export default function ChallengeDetailUI({
   const daysLeft = Math.ceil(
     (recruitEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
   );
-  const participantsQuery = useQuery({
-    queryKey: ["challenge-participants", course.slug],
-    queryFn: () => getChallengeParticipants(course.slug),
-    enabled: !!user,
-  });
-
-  const participants = participantsQuery.data?.data;
-  const isAlreadyJoined =
-    participants && Array.isArray(participants)
-      ? participants.some((participant: any) => participant.userId === user?.id)
-      : false;
-
+  const isAlreadyJoined = challenge.isJoined;
+  console.log(isAlreadyJoined);
   const handleJoinChallenge = useCallback(async () => {
     if (!user) {
       toast.error("로그인이 필요합니다.");
@@ -137,17 +127,17 @@ export default function ChallengeDetailUI({
         if (errorStatus === 409) {
           toast.success("챌린지 신청이 완료되었습니다!");
           router.push("/carts");
+          router.refresh();
           return;
         }
 
-        // 다른 에러
         toast.error("장바구니 추가에 실패했습니다.");
         setIsJoining(false);
         return;
       }
 
-      // 3. 성공 - 장바구니로 이동
       toast.success("챌린지 신청이 완료되었습니다!");
+
       router.push("/carts");
     } catch (error) {
       toast.error("챌린지 신청 중 오류가 발생했습니다.");
@@ -567,12 +557,12 @@ export default function ChallengeDetailUI({
                       !isRecruiting ||
                       isFull ||
                       isJoining ||
-                      isAlreadyJoined // ✅ 이미 신청한 경우 비활성화
+                      isAlreadyJoined
                     }
                   >
                     {!user
                       ? "로그인 후 신청하기"
-                      : isAlreadyJoined // ✅ 신청 완료 상태 표시
+                      : isAlreadyJoined
                       ? "신청완료"
                       : isBeforeRecruit
                       ? "모집 시작 전입니다"

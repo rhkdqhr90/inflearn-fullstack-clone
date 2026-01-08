@@ -148,6 +148,7 @@ export class CoursesService {
   }
 
   async findOne(id: string, userId?: string): Promise<CourseDetailDto | null> {
+    console.log('[findOneBySlug] userId:', userId);
     const course = await this.prisma.course.findUnique({
       where: { id },
       include: {
