@@ -506,15 +506,13 @@ export const addToCart = async (courseId: string) => {
     body: {
       courseId,
     },
-  });
-  console.log(data, error);
+  }); 
 
   return { data, error };
 };
 
 export const getCartItems = async () => {
   const { data, error } = await cartsControllerGetCartItems();
-  console.log(data);
 
   return { data, error };
 };
@@ -535,7 +533,7 @@ export const clearCart = async () => {
   return { data, error };
 };
 export const verifyPayment = async (verifyPaymentDto: VerifyPaymentDto) => {
-  console.log(verifyPaymentDto);
+ 
   const { data, error } = await paymentsControllerVerifyPayment({
     body: verifyPaymentDto,
   });

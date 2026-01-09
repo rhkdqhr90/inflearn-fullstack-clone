@@ -700,6 +700,8 @@ export default function UI({
   const courseLectureActivities = useQuery({
     queryFn: () => api.getAllLectureActivities(course.id),
     queryKey: ["course-lecture-activities", course.id],
+    staleTime: 2 * 60 * 1000, // 2분
+    gcTime: 5 * 60 * 1000, // 5분 (이전 cacheTime)
   });
   const handleSelectLecture = (lecture: LectureEntity) => {
     const params = new URLSearchParams(searchParams.toString());

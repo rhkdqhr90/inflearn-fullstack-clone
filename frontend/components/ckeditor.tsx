@@ -1,7 +1,6 @@
 // @ts-nocheck
 "use client";
-
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { CKEditor as CKEditorReact } from "@ckeditor/ckeditor5-react";
 import {
   ClassicEditor,
@@ -28,6 +27,20 @@ interface CustomEditorProps {
 }
 
 const CKEditor = ({ value, onChange }: CustomEditorProps) => {
+  const editorRef = useRef<ClassicEditor | null>(null);
+
+  // ✅ Cleanup 추가!
+  useEffect(() => {
+    return () => {
+      if (editorRef.current) {
+        editorRef.current.destroy().catch((error: any) => {
+          console.error("Editor cleanup error:", error);
+        });
+        editorRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <div className="ck-editor-container prose">
       <CKEditorReact
@@ -70,6 +83,15 @@ const CKEditor = ({ value, onChange }: CustomEditorProps) => {
             "redo",
           ],
           language: "ko",
+          // ✅ 이미지 크기 제한 추가
+          image: {
+            upload: {
+              types: ["jpeg", "png", "gif", "webp"],
+            },
+          },
+        }}
+        onReady={(editor) => {
+          editorRef.current = editor;
         }}
         onChange={(_, editor) => {
           const data = editor.getData();
