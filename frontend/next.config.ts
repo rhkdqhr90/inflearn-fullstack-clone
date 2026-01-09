@@ -45,5 +45,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-// ✅ withSentryConfig 제거! 바로 export
 export default nextConfig;
